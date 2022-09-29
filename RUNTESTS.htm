@@ -1,0 +1,68 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <title>Jinx TEST SUITES</title>    
+
+      
+  </head>
+
+  <body>
+
+
+    <script src="jquery-3.3.1.min.js"></script>
+
+    <script src="utils.js"></script>
+
+    <script src="runtime/jinx.js"></script>
+
+    <script src="testManager.js"></script>
+
+    <script src="tests/test1.js"></script>
+    <script src="tests/test2.js"></script>
+
+    <script src="tests/auto-nesting-generator.js"></script>
+
+    <script>
+
+      let runTestsVerbose = 0
+
+      window.onload = () => {
+        let h = `       This tests the JINX runtime (and nothing else.)<br>
+      Results will display in the console.<br><br>`
+        let i = -1
+        for (let item of testSuite) {
+          i++
+          h += `<button onclick="go(${i})">${item.name}</button>${item.notes}<br><br>`
+        }
+        $("body").html(h)
+      }
+
+      function go(x) {
+        let testSuite = window.testSuite
+        testManager.setVerbose(runTestsVerbose)
+        console.log(runTestsVerbose ? "%c Running tests in verbose mode."
+          : "%c Running tests in terse mode (non-verbose).", "font-style: italic;")
+        
+        if (!testSuite) throw new Error("No test suites found.")
+        console.log(testSuite.length + " test suites found.")
+        let i = x
+        let suite = testSuite[x]
+
+        console.log(`%c Starting Test Suite ${i}:`, "background: blue; color: white;")
+        console.log("Running suite " + i+ " of " + (testSuite.length - 1) + ": '" + suite.name + "'"
+          + ` (${suite.tests?.length} tests)`)
+        if (suite.notes) console.log(`Notes: ${suite.notes}`)
+        testManager.runTestSuite(jinx, suite)
+
+        return
+      }
+    </script>
+
+  </body>
+
+</html>
+

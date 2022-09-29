@@ -1,0 +1,1 @@
+window.runTimeData.style = {"Contents":"\n\n* {\n  box-sizing: border-box;\n}","Meta":"style.css"}

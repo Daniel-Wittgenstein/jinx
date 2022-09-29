@@ -1,0 +1,58 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <title>Jinx</title>    
+    <link rel="stylesheet" href="style.css">
+   
+    <script src="code-mirror-lib/codemirror.js"></script>
+    <link rel="stylesheet" href="code-mirror-lib/codemirror.css">
+
+
+      
+  </head>
+
+  <body>
+    <div class="app">
+      <div class="top bar">
+        <button class="bar-button">Load</button>
+        <button class="bar-button">Save</button>
+        <button class="bar-button">Export</button>
+      </div>
+      <div class="tab-bar" id="tab-bar">
+        <div class="tab tab-chosen" id="tab-play" onclick="selectTab('play')">Play</div>
+        <div class="tab" id="tab-help" onclick="selectTab('help')">Help</div>
+      </div>
+      <div class="code mids" id="code"></div>
+      <div class="play mids">
+        <div class="tab-content" id="tab-content-play">
+          <iframe id="play-iframe"></iframe>       
+          <div id="run-results"></div>
+        </div>
+        <div class="tab-content" id="tab-content-help"></div>
+      </div>
+      <div class="bottom bar"></div>
+    </div>
+
+    <script src="jquery-3.3.1.min.js"></script>
+
+    <script src="utils.js"></script>
+
+    <script src="createHtmlTemplate.js"></script>
+
+    <script src="runtime-auto-built/jinx.js"></script>
+    <script src="runtime-auto-built/index.js"></script>
+    <script src="runtime-auto-built/style.js"></script>
+    <script src="runtime-auto-built/runner.js"></script>
+    <script src="runtime-auto-built/utils.js"></script>
+
+
+    <script src="run.js"></script>
+
+  </body>
+
+</html>
+
