@@ -43,6 +43,7 @@ jinx = (function() {
         this.compilationFailed = true
         return
       }
+      
     }
 
     initStory(a) {
@@ -54,6 +55,8 @@ jinx = (function() {
       }
 
       let result
+
+      a = normalizeWhitespace(a)
 
       if (debug.compilationTime) {console.time("tokenize time")}
       let lines = tokenize(a)
@@ -385,7 +388,11 @@ jinx = (function() {
       paragraphs = paragraphs.filter(n => n.text)
 
       return paragraphs
-   }
+    }
+
+    execLabel(line) {
+      //nothing at the moment
+    }
 
 
     execChoice(line) {
@@ -671,38 +678,20 @@ jinx = (function() {
       } else if ( line.startsWith(".goto ") || line.startsWith(".g ")
         || line.startsWith("->") ) {
         type = "goto"
-      } else if ( line === ".js" ) {
-        type = "js-start"
-      } else if ( line === ".jsend" ) {
-        type = "js-end"
-      } else if ( line.startsWith(".if ") ) {
-        type = "if"
-      } else if ( line.startsWith(".else") ) {
-        type = "else"
-      } else if ( line === ".end" ) {
-        type = "end"
-      } else if ( line.startsWith(".each ") ) {
-        type = "each"
-      } else if ( line.startsWith(".loop ") ) {
-        type = "loop"
-      } else if ( line.startsWith(".for ") ) {
-        type = "for"
-      } else if ( line.startsWith(".choice ") ) {
-        type = "make-choice"
-      } else if ( line.startsWith(".set ") ) {
-        type = "set"
-      } else if ( line.startsWith(".endgame") ) {
-        type = "end-game"
       } else if ( line.startsWith("//") ) {
         //comment
         return false
       } else if (line.startsWith(".")) {
-        return {
-          error: true,
-          msg: `Unknown dot command: ${line}`,
-          lineNr: i + 1,
-          lineObj: false,
+        let res = getDotCommandType(line)
+        if (!res) {
+          return {
+            error: true,
+            msg: `Unknown dot command: ${line}`,
+            lineNr: i + 1,
+            lineObj: false,
+          }
         }
+        type = res
       } else if (type !== "empty") {
         type = "text"
       }
@@ -716,6 +705,42 @@ jinx = (function() {
     lines = lines.filter( n => n )
     return lines
   }
+
+
+  function getDotCommandType(line) {
+    //return falsey, if not a valid dot command,
+    //else return string representing the type
+    let type = false
+    line = line.replace(".", "").trim()
+
+    const firstWord = line.split(" ").map(n => n.trim()).filter(n => n)[0]
+
+    if ( firstWord === "js" ) {
+      type = "js-start"
+    } else if ( firstWord === "jsend" ) {
+      type = "js-end"
+    } else if ( firstWord === "if" ) {
+      type = "if"
+    } else if ( firstWord === "else" ) {
+      type = "else"
+    } else if (firstWord === "end" ) {
+      type = "end"
+    } else if ( firstWord === "each " ) {
+      type = "each"
+    } else if ( firstWord === "loop " ) {
+      type = "loop"
+    } else if ( firstWord === "for " ) {
+      type = "for"
+    } else if ( firstWord === "choice " ) {
+      type = "make-choice"
+    } else if ( firstWord === "set ") {
+      type = "set"
+    } else if ( firstWord === "endgame") {
+      type = "end-game"
+    }
+    return type
+  }
+
 
   function annotateLines(lines) {
     function annotateLine(line, index) {
@@ -859,6 +884,11 @@ jinx = (function() {
     return lines
 
   }
+
+  function normalizeWhitespace(str) {
+    return str.replace(/\t/g, " ")
+  }
+
 
   function createNewStory(... args) {
     return new Story(... args)

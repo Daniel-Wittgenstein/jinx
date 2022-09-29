@@ -28,11 +28,13 @@
 
     <script>
 
-      let runTestsVerbose = 0
+      let runTestsVerbose = 1
 
       window.onload = () => {
         let h = `       This tests the JINX runtime (and nothing else.)<br>
-      Results will display in the console.<br><br>`
+      Results will display in the console.<br><br>
+      These tests are known to pass. If they do not, you broke something.<br><br>
+      `
         let i = -1
         for (let item of testSuite) {
           i++

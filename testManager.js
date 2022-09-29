@@ -3,7 +3,7 @@
 
 window.testManager = (function() {
 
-  let verbose = false //do not change this. change it inside run.js -> DEBUG options
+  let verbose = false //do not change this. change it inside RUNTESTS.htm
 
   function setVerbose(x = true) {
     verbose = x
@@ -149,6 +149,7 @@ window.testManager = (function() {
       }
       if (verbose) console.log(`Selected choice "${item}" with index ${chosen.index}.`)
       story.selectChoice(chosen.index)
+      console.log( "window._test is:", JSON.stringify(window._test) )
       return true
     }
     return true

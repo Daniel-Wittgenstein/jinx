@@ -21329,7 +21329,7 @@ window.testSuite[1] = {
       
  -
 # window._test.ccc = 1
-
+.endgame
       
       `,
       SKIP: 0,
@@ -21344,8 +21344,11 @@ window.testSuite[1] = {
           "PATH_A6",
           "PATH_A7",
           {assert: () => {
-            window._test.aaa === 1 &&
-            window._test.bbb === 1
+            return (
+              window._test.aaa === 1 &&
+              window._test.bbb === 1 &&
+              window._test.ccc === 1
+            )
           }}
         ],
 
