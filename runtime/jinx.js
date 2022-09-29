@@ -390,10 +390,23 @@ jinx = (function() {
       return paragraphs
     }
 
+
     execLabel(line) {
       //nothing at the moment
     }
 
+    execIf(line) {
+      //todo to do
+      //console.log("if", line)
+    }
+    
+    execElse(line) {
+      //nothing at the moment
+    }
+    
+    execEnd(line) {
+      //nothing at the moment
+    }
 
     execChoice(line) {
       //populates this.choices with choice objects containing choice text
@@ -544,6 +557,29 @@ jinx = (function() {
   }
 
   function annotateBlocks(lines) {
+    function An(str) {
+      const char = str.substr(0, 1).toLowerCase()
+      if (["a", "e", "i", "o", "u"].includes(char)) {
+        return "An"
+      }
+      return "A"
+    }
+
+    function getUnclosedBlockError(stack, line) {
+      let lastLine = stack[stack.length - 1]
+      let txt = 
+        `${stack.length} unclosed block${stack.length > 1 ? "s" : ""}. `+
+        `${An(lastLine.type)} ${lastLine.type} block was opened on ` +
+        `line ${lastLine.lineNr} and ` + 
+        `it should have been closed before line ${line.lineNr}.`
+      return {
+        error: true,
+        lineNr: line.lineNr,
+        lineObj: line, 
+        msg: txt,
+      }
+    }
+
     //if for each loop end endjs else processing
     let currentLevel = -1000
     let stack = []
@@ -553,20 +589,7 @@ jinx = (function() {
       let t = line.type
       if (line.level !== currentLevel) {
         if (stack.length) {
-          let lastLine = stack[stack.length-1]
-          let txt = 
-            `${stack.length} unclosed block(s). `+
-            `A(n) ${lastLine.type} block was opened on ` +
-            `line <<1>> and ` + 
-            `it should have been closed before line <<2>>.`
-          return {
-            "<<1>>": lastLine.lineNr,
-            "<<2>>": line.lineNr,
-            error: true,
-            lineNr: line.lineNr,
-            lineObj: line, 
-            msg: txt,
-          }
+          return getUnclosedBlockError(stack, line)
         }
         stack = []
       }
@@ -638,6 +661,24 @@ jinx = (function() {
       }
       currentLevel = line.level
     }
+    console.log("stack", stack, stack.length, JSON.stringify(stack[0]))
+
+    if(stack.length) {
+      const lastLine = stack[stack.length - 1]
+      let txt = 
+        `${stack.length} unclosed block${stack.length > 1 ? "s" : ""}. `+
+        `${An(lastLine.type)} ${lastLine.type} block was opened on ` +
+        `line ${lastLine.lineNr} and ` + 
+        `should have been closed.`
+      return {
+        error: true,
+        lineNr: lastLine.lineNr,
+        lineObj: lastLine, 
+        msg: txt,
+      }
+    }
+
+
     return lines
   }
 
@@ -659,7 +700,6 @@ jinx = (function() {
       } else {
         lastLineWasEmpty = false
       }
-
 
       if ( line.startsWith("===") ) {
         type = "knot"
@@ -703,7 +743,35 @@ jinx = (function() {
       }
     })
     lines = lines.filter( n => n )
+    for (let line of lines) {
+      const res = checkLineSyntax(line)
+      if (res) return {
+        error: true,
+        msg: res,
+        lineNr: line.lineNr,
+        lineObj: line,
+      }
+    }
     return lines
+  }
+
+  function checkLineSyntax(line) {
+    //return falsey value for: everything fine
+    //and string for error occurred, show this error message.
+    //each line has to go through here
+    const type = line.type
+    const mustBeSingle = new Set(["else", "js", "jsend", "end", "endgame"])
+    if ( mustBeSingle.has(type) ) {
+      const wordAmount = line.text.replace(".", "")
+        .trim().split(" ").map(n => n.trim()).filter(n => n).length  
+      if (wordAmount > 1) {
+
+        return `${type} line cannot contain additional text. I saw ${wordAmount} words on that line, 
+        but only the first one makes sense to me.`
+      }
+    }
+
+    return false
   }
 
 
@@ -727,10 +795,13 @@ jinx = (function() {
       type = "end"
     } else if ( firstWord === "each " ) {
       type = "each"
+      type = false //currently not supported
     } else if ( firstWord === "loop " ) {
       type = "loop"
+      type = false //currently not supported
     } else if ( firstWord === "for " ) {
       type = "for"
+      type = false //currently not supported
     } else if ( firstWord === "choice " ) {
       type = "make-choice"
     } else if ( firstWord === "set ") {
@@ -796,7 +867,7 @@ jinx = (function() {
       }
     
       return line
-    }  
+    }
 
     let jumpTable = {}
     let i = -1
