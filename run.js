@@ -28,7 +28,7 @@ function saveSession() {
 
 function start() {
 
-  console.clear()
+  //console.clear()
 
   setIframeContents("") //Apparently Firefox needs this. Otherwise it will initially
     //display a "page not found" message inside the iframe until the iframe content
@@ -38,8 +38,7 @@ function start() {
 
   codeMirror = CodeMirror(document.getElementById("code"), {
     value: "",
-    theme: "",
-    mode:  "javascript",
+    mode:  "jinx",
     indentUnit: 2,
     tabSize: 2,
     lineNumbers: true,

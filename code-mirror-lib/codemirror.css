@@ -120,7 +120,7 @@
 .cm-s-default .cm-operator {}
 .cm-s-default .cm-variable-2 {color: #05a;}
 .cm-s-default .cm-variable-3, .cm-s-default .cm-type {color: #085;}
-.cm-s-default .cm-comment {color: #a50;}
+.cm-s-default .cm-comment {color: rgb(52, 79, 90);}
 .cm-s-default .cm-string {color: #a11;}
 .cm-s-default .cm-string-2 {color: #f50;}
 .cm-s-default .cm-meta {color: #555;}
@@ -342,3 +342,23 @@ div.CodeMirror-dragcursors {
 
 /* Help users use markselection to safely style text background */
 span.CodeMirror-selectedtext { background: none; }
+
+
+
+
+/* additional styles: */
+
+/* this only styles the keywords .js and .jsend. everything
+in between is styled as JavaScript: */
+.cm-s-default .cm-multi-line-js {background: #a50; color: white;}
+
+.cm-s-default .cm-single-line-js {color: #a50;}
+
+.cm-s-default .cm-knot-heading {color: rgb(34, 117, 18);}
+
+.cm-s-default .cm-label {color: rgb(51, 158, 37);}
+
+.cm-s-default .cm-dot-command {color: rgb(42, 53, 156);}
+
+.cm-s-default .cm-choice {color: rgb(20, 32, 100);}
+

@@ -198,8 +198,18 @@ jinx = (function() {
       this.lastGlueSet = false
     }
 
-    rtError(index, msg) {
-      let line = this.lines[index]
+    rtError(index, msg, lineNrMode = true) {
+      /* lineNrMode
+        true (default): pass index of line in line array as first parameter
+        false: pass actual line number in code
+      
+      */
+      let line
+      if (lineNrMode) {
+        line = this.lines[index]
+      } else {
+        line = this.lines.filter(l => l.lineNr === index)[0]
+      }
       let lnr
       let legal = true
       if (line) {
@@ -288,6 +298,8 @@ jinx = (function() {
         this.rtError(index, "Max. recursion exceeded. Do you have an infinite loop?")
         return
       }
+
+      if (result === "doNotAdvanceLine") return
 
       this.advanceToNextLine(line, index)
     }
@@ -397,11 +409,49 @@ jinx = (function() {
 
     execIf(line) {
       //todo to do
-      //console.log("if", line)
+      console.log("if", line, line.lineNr)
+      const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€` //prevent collision
+      window[str] = false
+      try {
+        eval (`window["${str}"] = ( ` + line.text+ " )" )
+      } catch(err) {
+        this.rtError(line.lineNr, "if-condition: JavaScript threw an error. Is this a valid condition?"+
+          `<br>${err}`, false)
+        return
+      }
+      let target = false
+      if (!window[str]) {
+        //condition failed:
+        //jump to corresponding else, if there is one, otherwise to corresponding end
+        if (line.correspondingElse) {
+          target = line.correspondingElse + 1
+        } else {
+          target = line.correspondingEnd
+        }
+      } else {
+        //condition succeeded
+        return
+        //return "doNotAdvanceLine"
+
+      }
+      if (!target) {
+        this.rtError(line.lineNr, 'if-condition seems to have no valid "end" command.')
+        return
+      }
+      
+      //jump: breaks fucking everything
+      console.log("jumping to", target)
+      this.pointer =  target
+      this.executeLine(this.pointer)
     }
     
     execElse(line) {
-      //nothing at the moment
+      //jump to corresponding end
+      if (!line.correspondingEnd) throw new Error(`else has no if/end block? This should not happen.`)
+      const target = line.correspondingEnd
+      console.log("exec else jump to", target)
+      //this.pointer =  target
+      //this.executeLine(this.pointer)
     }
     
     execEnd(line) {
@@ -612,7 +662,8 @@ jinx = (function() {
             msg: `I found an ".else" line, but there was no ".if" line before that, so it makes no sense to me.`,
           }
         }
-        lastLine.correspondingElse = index
+        lastLine.correspondingElse = line.lineNr
+        lastLine.correspondingElseObj = line
         if (lastLine.type !== "if") {
           return {
             error: true,
@@ -621,6 +672,7 @@ jinx = (function() {
             msg: `".else" may only appear inside an ".if" block`,
           }
         }
+        line.correspondingIf = lastLine.lineNr
       } else if (t === "end" || t === "js-end") {
         let lastLine = stack[stack.length - 1]
         if (!lastLine) {
@@ -637,8 +689,8 @@ jinx = (function() {
             lineNr: line.lineNr,
             lineObj: line, 
             msg: `A normal block should be closed with ".end", not with ".jsend".`,
-          }        
-        }    
+          } 
+        }
         if (t === "end" && lastLine.type === "js-start") {
           return {
             error: true,
@@ -656,8 +708,14 @@ jinx = (function() {
           }  
         }
         let last = stack.pop()
-        last.correspondingEnd = index
-        //if (last.type )
+        last.correspondingEnd = line.lineNr
+        if ( t === "end" ) {
+          const lastIf = last
+          if (lastIf.correspondingElseObj) {
+            lastIf.correspondingElseObj.correspondingEnd = line.lineNr
+            delete lastIf.correspondingElseObj //not needed anymore
+          }
+        }
       }
       currentLevel = line.level
     }
@@ -742,7 +800,13 @@ jinx = (function() {
         lineNr: i + 1, //(starting from 1 not 0)
       }
     })
-    lines = lines.filter( n => n )
+      //lines = lines.filter( n => n ) NO! JUST NO!
+    lines = lines.map ( n => {
+      if (!n) return {
+        type: "empty"
+      }
+      return n
+    })
     for (let line of lines) {
       const res = checkLineSyntax(line)
       if (res) return {
@@ -770,7 +834,6 @@ jinx = (function() {
         but only the first one makes sense to me.`
       }
     }
-
     return false
   }
 
