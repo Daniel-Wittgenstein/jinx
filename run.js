@@ -16,6 +16,7 @@ const temp = {
 $(window).on("load", start)
 
 let codeMirror
+let codeMirrorHtml
 
 const localStorageKey = "BuffySummers"
 
@@ -46,8 +47,8 @@ function start() {
     //is set for the SECOND(!) time. No idea how that actually makes sense, it does
     //not make sense to me. Source: own experimentation only.
 
-
-  codeMirror = CodeMirror(document.getElementById("code"), {
+    
+  codeMirror = CodeMirror(document.getElementById("tab-content-story"), {
     value: "",
     mode:  "jinx",
     indentUnit: 2,
@@ -59,14 +60,26 @@ function start() {
 
   codeMirror.on("change", onEditorChange)
   
+  codeMirrorHtml = CodeMirror(document.getElementById("tab-content-html"), {
+    value: window.runTimeData.index.Contents,
+    mode:  "htmlmixed",
+    indentUnit: 2,
+    tabSize: 2,
+    lineNumbers: true,
+    lineWrapping: false,
+    spellcheck: false,
+  })
 
+  codeMirrorHtml.on("change", onEditorChange)
+  
   const savData = localStorage.getItem(localStorageKey)
   if (savData) {
     loadSession(savData)
   }
 
-  selectTab("play")
-  //selectTab("help")
+  selectTab("html", 0)
+  selectTab("play", 1)
+  //selectTab("help", 1)
   //showRunResults()
   //showPlayBox()
   initHelp()
@@ -101,7 +114,9 @@ function translate() {
     content: v,
   }
   v = "storyData = " + JSON.stringify(v)
-  html = createHtmlTemplate("untitled story", v)
+
+  const htmlContent = codeMirrorHtml.getValue()
+  html = createHtmlTemplate(htmlContent, v)
   setIframeContents(html)
   return
 }
@@ -116,11 +131,13 @@ function onEditorChange() {
 
 
 
-function selectTab(name) {
-  $(".tab").removeClass("tab-chosen")
+function selectTab(name, dir = 1) {
+  let area = "left"
+  if (dir === 1) area = "right"
+  $(".tab-" + area).removeClass("tab-chosen")
   $("#tab-" + name).addClass("tab-chosen")
   const target = "#tab-content-" + name
-  $(".tab-content").hide()
+  $(".tab-content-" + area).hide()
   $(target).show()
 }
 

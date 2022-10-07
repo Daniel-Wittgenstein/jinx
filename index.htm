@@ -14,6 +14,11 @@
 
     <script src="codemirror-5.65.8/mode/javascript/javascript.js"></script>
 
+    <script src="codemirror-5.65.8/mode/xml/xml.js"></script>
+    <script src="codemirror-5.65.8/mode/css/css.js"></script>
+    <script src="codemirror-5.65.8/mode/htmlmixed/htmlmixed.js"></script>
+
+
     <script src="cm-mode/jinx-mode.js"></script>
 
     <link rel="stylesheet" href="code-mirror-lib/codemirror.css">
@@ -25,23 +30,32 @@
   <body>
     <div class="app">
       <div class="top bar">
+        <div class="tab tab-left tab-chosen" id="tab-story" onclick="selectTab('story', 0)">Story</div>
+        <div class="tab tab-left" id="tab-html" onclick="selectTab('html', 0)">HTML</div>
+      </div>
+      <div class="tab-bar" id="tab-bar">
+        <div class="tab tab-right tab-chosen" id="tab-play" onclick="selectTab('play', 1)">Play</div>
+        <div class="tab tab-right" id="tab-help" onclick="selectTab('help', 1)">Help</div>
+      </div>
+
+
+      <div class="code mids" id="code">
+        <div class="tab-content-left" id="tab-content-story"></div>
+        <div class="tab-content-left" id="tab-content-html"></div>
+      </div>
+
+      <div class="play mids">
+        <div class="tab-content-right" id="tab-content-play">
+          <iframe id="play-iframe"></iframe>       
+          <div id="run-results"></div>
+        </div>
+        <div class="tab-content-right" id="tab-content-help"></div>
+      </div>
+      <div class="bottom bar">
         <button class="bar-button">Load</button>
         <button class="bar-button">Save</button>
         <button class="bar-button">Export</button>
       </div>
-      <div class="tab-bar" id="tab-bar">
-        <div class="tab tab-chosen" id="tab-play" onclick="selectTab('play')">Play</div>
-        <div class="tab" id="tab-help" onclick="selectTab('help')">Help</div>
-      </div>
-      <div class="code mids" id="code"></div>
-      <div class="play mids">
-        <div class="tab-content" id="tab-content-play">
-          <iframe id="play-iframe"></iframe>       
-          <div id="run-results"></div>
-        </div>
-        <div class="tab-content" id="tab-content-help"></div>
-      </div>
-      <div class="bottom bar"></div>
     </div>
 
     <script src="jquery-3.3.1.min.js"></script>

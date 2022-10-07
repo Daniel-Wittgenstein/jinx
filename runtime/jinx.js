@@ -545,6 +545,7 @@ jinx = (function() {
 
     execVoid() {
       //do absolutely nothing
+      return "advanceByOne"
     }
 
 
