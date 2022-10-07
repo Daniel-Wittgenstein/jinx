@@ -305,7 +305,6 @@ jinx = (function() {
       }
 
       if (result && result.jumpTo) {
-        console.log("TRULY JUMPING TO", result.jumpTo)
         this.pointer = result.jumpTo
       }
 
@@ -502,8 +501,6 @@ jinx = (function() {
       //populate this.choices with choice objects containing choice text
       //assumes that lineNr of choice is unique, which it really should be
       //unless there is a serious bug
-
-      console.log("execing choice", line)
 
       if (this.previouslyExecutedLine && this.previouslyExecutedLine.level !==
         line.level) {
@@ -1043,6 +1040,7 @@ jinx = (function() {
     let lastChoiceLevel = -1
     for (let line of lines) {
       i++
+      const index = i
       if (line.type === "choice") {
         const level = line.level
         const diff = level - lastChoiceLevel
@@ -1079,13 +1077,14 @@ jinx = (function() {
           entry.nextChoiceOfSameLevel = "endBlock"
         }
       //####################################
-      } else if (line.type === "knot") {
+      } else if (line.type === "knot" || index >= lines.length - 1 ) {
         const level = line.level
-        let i = -1
+        let i = 0
         while (true) {
           i++
           const entry = lastChoiceByLevel[i]
           if (!entry) break
+          entry.nextChoiceOfSameLevel = "endBlock"
           lastChoiceByLevel[i] = false
         }
       }
