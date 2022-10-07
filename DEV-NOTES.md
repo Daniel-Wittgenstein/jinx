@@ -54,6 +54,10 @@ GENERAL INSTRUCTIONS FOR DEVELOPING - TO START DEVELOPMENT ON THIS APP:
 
   THE ONLY RECOMMENDED WAY TO RUN THE APP LOCALLY IS VIA HTTPS!
 
+  Note: the local HTTPS server does not auto-restart on file changes.
+  If you want that feature, you would have to code it yourself
+  with node. Currently, I just refresh the browser via keyboard shortcut.
+
 #################
 #################
 #################
