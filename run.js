@@ -103,6 +103,7 @@ function start() {
   $("#load-button").on("click", clickLoad)
   $("#save-button").on("click", clickSave)
   $("#export-button").on("click", clickExport)
+  $("#about-button").on("click", clickAbout)
 
   selectTab("story", 0)
   selectTab("play", 1)
@@ -112,6 +113,10 @@ function start() {
   initHelp()
   ////translate()
 
+}
+
+function clickAbout() {
+  alert(`JinxEdit version "${appMetaData.version}"`)
 }
 
 
