@@ -28,15 +28,27 @@ function loadSession(savData) {
     alert("Load session: corrupted localStorage? Could not load last session. Sorry.")
     return
   }
-  codeMirror.setValue(v.editorContent)
+  codeMirror.setValue(v.story)
+  codeMirrorHtml.setValue(v.html)
 }
 
 function saveSession() {
-  const savData = {
-    editorContent: codeMirror.getValue(),
-  }
+  const savData = getStoryData()
   localStorage.setItem( localStorageKey, JSON.stringify(savData) )
 }
+
+function getStoryData() {
+  return {
+    story: codeMirror.getValue(),
+    html: codeMirrorHtml.getValue(),
+  }
+}
+
+function setStoryData(state) {
+  codeMirror.setValue(state.story)
+  codeMirrorHtml.setValue(state.html)
+}
+
 
 function start() {
 
@@ -77,7 +89,7 @@ function start() {
     loadSession(savData)
   }
 
-  selectTab("html", 0)
+  selectTab("story", 0)
   selectTab("play", 1)
   //selectTab("help", 1)
   //showRunResults()
