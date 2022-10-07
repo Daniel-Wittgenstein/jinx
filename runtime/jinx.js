@@ -16,6 +16,8 @@ jinx = (function() {
     log: false,
     logFlow: false,
     compilationTime: false,
+    turtle: false,
+    turtleSpeed: 10,
   }
 
   const GLUESYMBOL = "<>"
@@ -170,7 +172,7 @@ jinx = (function() {
         return
       }
 
-      if (debug.logFlow) console.log("CONTINUING AT LINE", i + 1)
+      console.log("doContinueFromChoice, CONTINUING AT LINE", i + 1)
       this.pointer =  i + 1
       this.executeLine(this.pointer)
       //this.advanceToNextLine(line, i)
@@ -184,7 +186,7 @@ jinx = (function() {
       this.pointer = 0
       this.inited = true
       this.securityCounter = 0
-
+      console.log("restart, executing line now: ", this.pointer) //, this.lines[this.pointer])
       this.executeLine(this.pointer)
     }  
 
@@ -230,101 +232,97 @@ jinx = (function() {
       })
     }
 
-    onFinishedCollecting() {
-      //console.log("finished collecting")
-      this.onEvent("finishedCollecting")
-    }
 
-    advanceToNextLine(line, index) {
-      let res = getNextLine(this.lines, line, index, this.jumpTable)
-      //console.log("next line", res)
-
-      if (res && res.error) {
-        this.rtError(index, res.msg)
-        return
-      }
-
-      if (res === "no-continuation") {
-        this.rtError(index, `Story flow runs out. Do you need an ".endgame" line?`)
-        return
-      }
-
-      if (res === "finished-collecting") {
-        this.onFinishedCollecting()
-        return
-      }
-
-      this.pointer = res
-
-      //console.log(res, line.continuation)
-      //console.log("going to line ", this.pointer) //, this.lines[this.pointer])
-
-      this.executeLine(this.pointer)
-    }
 
     capitalize(n) {
       return n.substr(0, 1).toUpperCase() + n.substr(1)
     }
 
-    onGameEnd(index) {
-      //console.log("Game ended with instruction .gameEnd", this.lines[index])
-      this.onEvent("finishedCollecting")
-    }
+
+
+
+
 
     executeLine(index) {
+      /* todo to do: finish */
+
+      console.log("%c FUCKING CALLING EXECUTE LINE", "background: orange; color: teal;")
       this.securityCounter ++
       //assuming this is the correct line to run. no level checks etc. here.
       let line = this.lines[index]
-      if (debug.log) console.log("running line", index, line)
-      if (!line) {
-        //this.rtError(index, "Line does not exist.")
-        console.log("Line is: ", line)
-        throw `Line does not exist`
-      }
-      if (!line.type) {
-        console.log(line, line.type)
-        throw `Line has no type.`
-      }
-      const acc = "exec" + this.capitalize(line.type.replaceAll("-", ""))
-      let func = this[acc]
-      if (!func) throw `No execution method for line type: ${line.type}`
-      let result = func.bind(this)(line)
-      if (result === "gameEnd") {
-        this.onGameEnd(index)
-        return
-      }
+      console.log("EXECUTING LINE with index:", index, "line:", line)
 
       if (this.securityCounter >= this.securityMax) {
         this.rtError(index, "Max. recursion exceeded. Do you have an infinite loop?")
         return
       }
 
-      if (result === "doNotAdvanceLine") return
-
-      this.advanceToNextLine(line, index)
-    }
-
-    execEmpty(line) {
-      //empty line (paragraph delimiter)
-      this.paragraphBuffer.push({type: "empty-line"})
-    }
- 
-    execText(line) {
-      let text = line.text
-      let startGlue = false
-      let endGlue = false
-      if (text.startsWith(GLUESYMBOL)) {
-        text = text.substr(2)
-        startGlue = true
+      if (debug.turtle) {
+        //turtle does IO. Normally, of course,
+        //Jinx should NEVER do IO, but this is just for debugging purposes.
+        document.body.innerHTML += `EXECUTING LINE ${line.lineNr || line.type}: ${line.text}<br>`
       }
-      if (text.endsWith(GLUESYMBOL)) {
-        text = text.substr(0, text.length - 2)
-        endGlue = true
+
+
+      if (debug.log) console.log("running line", index, line)
+      
+      if (!line) {
+        //this.rtError(index, "Line does not exist.")
+        console.log("Line is: ", line)
+        throw `Line does not exist`
       }
-      if (startGlue) this.paragraphBuffer.push({type: "glue"})
-      this.paragraphBuffer.push({type: "text", text})
-      if (endGlue) this.paragraphBuffer.push({type: "glue"})
+
+      if (!line.type) {
+        console.log(line, line.type)
+        throw `Line has no type.`
+      }
+
+      const acc = "exec" + this.capitalize(line.type.replaceAll("-", ""))
+      let func = this[acc]
+      if (!func) throw `No execution method for line type: ${line.type} @ ${acc}`
+      let result = func.bind(this)(line)
+      let testGameJustEnded = false
+
+      if (result === "advanceByOne") this.pointer += 1
+
+      if (result && result.jumpTo) {
+        console.log("TRULY JUMPING TO", result.jumpTo)
+        this.pointer = result.jumpTo
+      }
+
+      if (result && result.error) {
+        this.rtError(index, result.msg)
+        return
+      }
+
+      if (result === "gameEnd") {
+        console.log("%c GAME ENDED", "background: blue; color: white")
+        this.onEvent("finishedCollecting")
+        return
+      }
+
+      if (result === "stopRunning") {
+        console.log("%c STOPPED RUNNING", "background: blue; color: white")
+        this.onEvent("finishedCollecting")
+        return
+      }
+
+      if (!result) {
+        throw new Error(`Execution method ${acc} should have returned something, not falsey value.`)
+        return
+      }
+
+      if (debug.turtle) {
+        setTimeout( () => this.executeLine(this.pointer), debug.turtleSpeed)
+      } else {
+        this.executeLine(this.pointer)
+      }
+      
+
     }
+
+    //execJsstart(line) {}
+
 
 
     
@@ -403,13 +401,37 @@ jinx = (function() {
     }
 
 
+    execEmpty(line) {
+      //empty line (paragraph delimiter)
+      this.paragraphBuffer.push({type: "empty-line"})
+      return "advanceByOne"
+    }
+ 
+    execText(line) {
+      let text = line.text
+      let startGlue = false
+      let endGlue = false
+      if (text.startsWith(GLUESYMBOL)) {
+        text = text.substr(2)
+        startGlue = true
+      }
+      if (text.endsWith(GLUESYMBOL)) {
+        text = text.substr(0, text.length - 2)
+        endGlue = true
+      }
+      if (startGlue) this.paragraphBuffer.push({type: "glue"})
+      this.paragraphBuffer.push({type: "text", text})
+      if (endGlue) this.paragraphBuffer.push({type: "glue"})
+      return "advanceByOne"
+    }
+
     execLabel(line) {
       //nothing at the moment
+      return "advanceByOne"
     }
 
     execIf(line) {
-      //todo to do
-      console.log("if", line, line.lineNr)
+      //todo to do: really implement, it's garbage right now
       const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€` //prevent collision
       window[str] = false
       try {
@@ -417,32 +439,33 @@ jinx = (function() {
       } catch(err) {
         this.rtError(line.lineNr, "if-condition: JavaScript threw an error. Is this a valid condition?"+
           `<br>${err}`, false)
-        return
+        return "stopRunning"
       }
       let target = false
       if (!window[str]) {
+        console.log("if condition failed")
         //condition failed:
         //jump to corresponding else, if there is one, otherwise to corresponding end
         if (line.correspondingElse) {
-          target = line.correspondingElse + 1
+          console.log("else exists", line.correspondingElse)
+          target = line.correspondingElse
         } else {
           target = line.correspondingEnd
         }
       } else {
+        console.log("if condition succeeded")
         //condition succeeded
-        return
-        //return "doNotAdvanceLine"
+        return "advanceByOne"
 
       }
+
       if (!target) {
         this.rtError(line.lineNr, 'if-condition seems to have no valid "end" command.')
         return
       }
       
-      //jump: breaks fucking everything
-      console.log("jumping to", target)
-      this.pointer =  target
-      this.executeLine(this.pointer)
+      console.log("execIf, going to", target)
+      return {jumpTo: target}
     }
     
     execElse(line) {
@@ -450,12 +473,12 @@ jinx = (function() {
       if (!line.correspondingEnd) throw new Error(`else has no if/end block? This should not happen.`)
       const target = line.correspondingEnd
       console.log("exec else jump to", target)
-      //this.pointer =  target
-      //this.executeLine(this.pointer)
+      return {jumpTo: target}
     }
     
     execEnd(line) {
       //nothing at the moment
+      return "advanceByOne"
     }
 
     execChoice(line) {
@@ -475,6 +498,7 @@ jinx = (function() {
         internalLineNr: line.internalLineNr,
       }
       this.choices.push(choice)
+      return "advanceByOne"
     }
 
     log(msg) {
@@ -491,21 +515,26 @@ jinx = (function() {
         this.rtError(line.lineNr, `I executed a single JS line and ran into an error. This is the line:` +
           `\n${line.text}`)
       }
+      return "advanceByOne"
     }
 
     execGoto(line) {
-      //don't do anything. getNextLine does the jumping.
+      //todo to do: this better fucking return the label we have to jump to
+      const target = this.jumpTable[line.target]
+      if (!target && target !== 0) {
+        return {
+          error: true,
+          msg: `.goto ${line.target}: I didn't find a knot or label with this name.`,
+        }
+      }
+      return {jumpTo: target + 1}
     }
 
     execKnot(line) {
-      //      this.currentKnot = line.name
-      //      this.pointer ++
-      this.stopRunning()
+      return "stopRunning"
     }
     
     execEndgame(line) {
-      this.storyFinished = true
-      this.stopRunning()
       return "gameEnd"
     }
 
@@ -513,17 +542,11 @@ jinx = (function() {
       //nothing so far
     }
 
-    startRunning() {
-      this.running = true
-    }
 
     execVoid() {
       //do absolutely nothing
     }
 
-    stopRunning() {
-      this.running = false
-    }
 
 
   } //Class story
@@ -551,6 +574,7 @@ jinx = (function() {
   //####################
 
   function getNextLine(lines, line, lineIndex, jumpTable) {
+    //TODO TO DO: REWORK entirely
     //pass lines line and lineIndex, get back index of next line to execute
     //returns "no-continuation" if there is no next line (flow runs out,
     //basically; there is no gather to catch)
@@ -558,7 +582,7 @@ jinx = (function() {
     //(so a legal end-of-flow, basically)
     //todo to do: also handle blocks: if else end for each loop js
     if (line.continuation || line.continuation === 0) {
-      if (debug.logFlow) console.log("line", lineIndex, "has continuation of", line.continuation)
+      //if (debug.logFlow) console.log("line", lineIndex, "has continuation of", line.continuation)
       return line.continuation
     }
     if (line.type === "choice") {
@@ -582,29 +606,14 @@ jinx = (function() {
       }
       return
     }
-    if (line.type === "goto") {
-      const res = getNextLineFromGotoLine(line, jumpTable)
-      if (!res && res !== 0) {
-        return {
-          error: true,
-          msg: `Goto: invalid target.`,
-        }
-      }
-      return res
-    }
+
     let nextLine = lines[lineIndex + 1]
     if (!nextLine) return "no-continuation"
     if (nextLine.type === "knot") return "no-continuation"
     return lineIndex + 1
   }
 
-  function getNextLineFromGotoLine(line, jumpTable) {
-    const target = jumpTable[line.target]
-    if (!target && target !== 0) {
-      return false
-    }
-    return target
-  }
+
 
   function annotateBlocks(lines) {
     function An(str) {
@@ -719,7 +728,7 @@ jinx = (function() {
       }
       currentLevel = line.level
     }
-    console.log("stack", stack, stack.length, JSON.stringify(stack[0]))
+    //console.log("stack", stack, stack.length, JSON.stringify(stack[0]))
 
     if(stack.length) {
       const lastLine = stack[stack.length - 1]

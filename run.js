@@ -2,6 +2,17 @@
 
 const DEBUG = {}
 
+const settings = {
+  translateInterval: 500, //can be changed. how many milliseconds
+    //the app waits before translating the story. as long as the user
+    //types, the story is not translated. once the user stops typing,
+    //this amount of time has to pass until the story is re-translated.
+}
+
+const temp = {
+  lastTranslation: 0,
+}
+
 $(window).on("load", start)
 
 let codeMirror
@@ -59,7 +70,7 @@ function start() {
   //showRunResults()
   //showPlayBox()
   initHelp()
-  translate()
+  ////translate()
 
 }
 
@@ -75,6 +86,15 @@ function help() {
 }
 
 function translate() {
+  const time = + new Date()
+  const diff = time - temp.lastTranslation
+  temp.lastTranslation = time 
+  if (diff < settings.translateInterval * 0.75) {
+    throw new Error (`Fatal. setTimeout bug? Only ${diff} ms passed between the last two translations.`)
+  }
+
+  console.log("TRANSLATING")
+
   saveSession()
   let v = codeMirror.getValue()
   v = {
@@ -89,8 +109,9 @@ function translate() {
 let editorChangeTimeout
 
 function onEditorChange() {
+  console.log("%c EDITOR CONTENT CHANGED", "background: pink; color: black;")
   if (editorChangeTimeout) clearTimeout(editorChangeTimeout)
-  editorChangeTimeout = setTimeout(translate, 500)
+  editorChangeTimeout = setTimeout(translate, settings.translateInterval)
 }
 
 

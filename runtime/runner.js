@@ -3,16 +3,17 @@
 
 
 
-window.onload = start
+window.onload = startP
 
 let story
 
-function start() {
+function startP() {
   //jinx.setDebugOption("log")
   story = createJinxStory(storyData.content, onError, onStoryEvent)
   if (story.compilationFailed) {
     return
   }
+  console.log("%c RESTARTING STORY", "background: yellow; color: black;")
   story.restart()
 }
 
@@ -38,9 +39,9 @@ function onError(err) {
 
 
 function onStoryEvent(type) {
-  //console.log("JINX EVENT TRIGGERED:", type)
+  console.log("JINX EVENT TRIGGERED:", type)
   if (type === "finishedCollecting" || type === "gameEnd") {
-      renderStuff()
+    renderStuff()
   }
 }
 
