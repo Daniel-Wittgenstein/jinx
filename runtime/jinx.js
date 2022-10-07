@@ -104,6 +104,11 @@ jinx = (function() {
       if (lines.error) return lines
       if (debug.compilationTime) {console.timeEnd("annotate gathers")}
       
+      if (debug.compilationTime) {console.time("annotate choices")}
+      lines = annotateChoices(lines)
+      if (lines.error) return lines
+      if (debug.compilationTime) {console.timeEnd("annotate choices")}
+
       if (debug.compilationTime) {console.time("annotate blocks")}
       lines = annotateBlocks(lines)
       if (lines.error) return lines
@@ -146,6 +151,8 @@ jinx = (function() {
       //returns: new content to output
       //updates state according to selected choice
 
+      this.previouslyExecutedLine = false
+
       if (debug.logFlow) console.log("SELECTED CHOICE", index)
       if (!this.inited) throw `Call story.restart() first.`
       
@@ -175,7 +182,6 @@ jinx = (function() {
       console.log("doContinueFromChoice, CONTINUING AT LINE", i + 1)
       this.pointer =  i + 1
       this.executeLine(this.pointer)
-      //this.advanceToNextLine(line, i)
     }
     
     restart() {
@@ -186,7 +192,8 @@ jinx = (function() {
       this.pointer = 0
       this.inited = true
       this.securityCounter = 0
-      console.log("restart, executing line now: ", this.pointer) //, this.lines[this.pointer])
+      this.previouslyExecutedLine = false
+      //console.log("restart, executing line now: ", this.pointer) //, this.lines[this.pointer])
       this.executeLine(this.pointer)
     }  
 
@@ -244,13 +251,17 @@ jinx = (function() {
 
 
     executeLine(index) {
-      /* todo to do: finish */
 
-      console.log("%c FUCKING CALLING EXECUTE LINE", "background: orange; color: teal;")
+      if (index >= this.lines.length) {
+        this.rtError(index, `I reached the last line of the story. ` +
+          `I was expecting an .endgame command before that.`)
+        return
+      }
+
       this.securityCounter ++
       //assuming this is the correct line to run. no level checks etc. here.
       let line = this.lines[index]
-      console.log("EXECUTING LINE with index:", index, "line:", line)
+      //console.log("EXECUTING LINE with index:", index, "line:", line)
 
       if (this.securityCounter >= this.securityMax) {
         this.rtError(index, "Max. recursion exceeded. Do you have an infinite loop?")
@@ -268,7 +279,7 @@ jinx = (function() {
       
       if (!line) {
         //this.rtError(index, "Line does not exist.")
-        console.log("Line is: ", line)
+        console.log("Line is: ", line, "index:", index)
         throw `Line does not exist`
       }
 
@@ -280,10 +291,18 @@ jinx = (function() {
       const acc = "exec" + this.capitalize(line.type.replaceAll("-", ""))
       let func = this[acc]
       if (!func) throw `No execution method for line type: ${line.type} @ ${acc}`
-      let result = func.bind(this)(line)
+      let result = func.bind(this)(line, this.previouslyExecutedLine)
+
+      this.previouslyExecutedLine = line
       let testGameJustEnded = false
 
-      if (result === "advanceByOne") this.pointer += 1
+      if (result === "advanceByOne") {
+        if (line.continuation) {
+          this.pointer = line.continuation
+        } else {
+          this.pointer += 1
+        }
+      }
 
       if (result && result.jumpTo) {
         console.log("TRULY JUMPING TO", result.jumpTo)
@@ -431,7 +450,6 @@ jinx = (function() {
     }
 
     execIf(line) {
-      //todo to do: really implement, it's garbage right now
       const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€` //prevent collision
       window[str] = false
       try {
@@ -456,7 +474,6 @@ jinx = (function() {
         console.log("if condition succeeded")
         //condition succeeded
         return "advanceByOne"
-
       }
 
       if (!target) {
@@ -464,7 +481,7 @@ jinx = (function() {
         return
       }
       
-      console.log("execIf, going to", target)
+      //console.log("execIf, going to", target)
       return {jumpTo: target}
     }
     
@@ -482,14 +499,25 @@ jinx = (function() {
     }
 
     execChoice(line) {
-      //populates this.choices with choice objects containing choice text
+      //populate this.choices with choice objects containing choice text
       //assumes that lineNr of choice is unique, which it really should be
       //unless there is a serious bug
-      let id = line.lineNr
-      if (this.usedUpChoices[id]) return
-      if (line.subType === "once") {
-        this.usedUpChoices[id] = true
+
+      console.log("execing choice", line)
+
+      if (this.previouslyExecutedLine && this.previouslyExecutedLine.level !==
+        line.level) {
+          return {
+            error: true,
+            msg: `Encountered choice of wrong level. Maybe you forgot a gather?`,
+          }
       }
+
+      if (!line.nextChoiceOfSameLevel) {
+        console.log("erroneous line:", line)
+        throw new Error(`Fatal. Choice has no nextChoiceOfSameLevel.`)
+      }
+
       let choice = {
         text: line.text,
         level: line.level,
@@ -498,7 +526,13 @@ jinx = (function() {
         internalLineNr: line.internalLineNr,
       }
       this.choices.push(choice)
-      return "advanceByOne"
+
+
+      if (line.nextChoiceOfSameLevel === "endBlock") {
+        return "stopRunning"
+      }
+
+      return {jumpTo: line.nextChoiceOfSameLevel}
     }
 
     log(msg) {
@@ -519,7 +553,6 @@ jinx = (function() {
     }
 
     execGoto(line) {
-      //todo to do: this better fucking return the label we have to jump to
       const target = this.jumpTable[line.target]
       if (!target && target !== 0) {
         return {
@@ -539,12 +572,13 @@ jinx = (function() {
     }
 
     execGather(line) {
-      //nothing so far
+      return "advanceByOne"
     }
 
+    
 
     execVoid() {
-      //do absolutely nothing
+      //dummy lines. do absolutely nothing
       return "advanceByOne"
     }
 
@@ -575,7 +609,7 @@ jinx = (function() {
   //####################
 
   function getNextLine(lines, line, lineIndex, jumpTable) {
-    //TODO TO DO: REWORK entirely
+    //TODO TO DO: delete once everything else is done. only here for reference anymore.
     //pass lines line and lineIndex, get back index of next line to execute
     //returns "no-continuation" if there is no next line (flow runs out,
     //basically; there is no gather to catch)
@@ -977,6 +1011,90 @@ jinx = (function() {
     return lines
   }
 
+  function annotateChoices(lines) {
+    /* 
+      Here's what happens:
+      We walk from top to bottom.
+
+      If we meet a choice:
+      - l is the level of this choice
+      - all choices with level higher than l (so 3, 4, 5 etc.,
+      if choice is 2, for example) in the hashmap get a nextChoiceOfSameLevel
+      of "endBlock", because they are the last choices in their block,
+      since the lower-level choice indicated that their block was closed.
+      - if the hashmap entry lastChoiceOfLevel[l]
+        points to a choice, then that choice gets nextChoiceOfSameLevel = the current index
+        (if not, it must be the first choice in the block)
+      - the hashmap entry lastChoiceOfLevel[l] becomes a reference to the current choice
+
+      If we meet a gather:
+      - l is the level of the gather
+      - all choices in the hashmap with level higher than l OR EQUAL TO l get a nextChoiceOfSameLevel
+        of "endBlock"
+      
+      If we meet a knot start:
+      - clear the hashmap
+
+      No idea, if this approach is correct. Implement and test.
+    */
+
+    let i = -1
+    const lastChoiceByLevel = []
+    let lastChoiceLevel = -1
+    for (let line of lines) {
+      i++
+      if (line.type === "choice") {
+        const level = line.level
+        const diff = level - lastChoiceLevel
+        if (lastChoiceLevel > 0 && diff > 1) {
+          return {
+            lineNr: line.lineNr,
+            error: true,
+            msg: `I found a jump from choice level ${lastChoiceLevel} to choice level ${level}. `+
+            `I was expecting at least one level ${lastChoiceLevel + 1} choice in between, `+
+            `otherwise it makes no sense.`,
+          }
+        }
+        let i = level
+        while (true) {
+          i++
+          const entry = lastChoiceByLevel[i]
+          if (!entry) break
+          entry.nextChoiceOfSameLevel = "endBlock"
+        }
+        const prevLine = lastChoiceByLevel[line.level]
+        if (prevLine) {
+          prevLine.nextChoiceOfSameLevel = line.internalLineNr
+        }
+        lastChoiceByLevel[line.level] = line
+        lastChoiceLevel = line.level
+      //####################################
+      } else if (line.type === "gather") {
+        const level = line.level
+        let i = line.level - 1
+        while (true) {
+          i++
+          const entry = lastChoiceByLevel[i]
+          if (!entry) break
+          entry.nextChoiceOfSameLevel = "endBlock"
+        }
+      //####################################
+      } else if (line.type === "knot") {
+        const level = line.level
+        let i = -1
+        while (true) {
+          i++
+          const entry = lastChoiceByLevel[i]
+          if (!entry) break
+          lastChoiceByLevel[i] = false
+        }
+      }
+    } //for each lines
+
+    return lines
+
+  }
+
   function annotateGathers(lines) {
     function getNextGather(lines, startIndex, maxLevel) {
       //maxLevel: level must be lower than or equal to this
@@ -1026,7 +1144,6 @@ jinx = (function() {
     }
 
     return lines
-
   }
 
   function normalizeWhitespace(str) {
