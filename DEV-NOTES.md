@@ -32,6 +32,10 @@ GENERAL INSTRUCTIONS FOR DEVELOPING - TO START DEVELOPMENT ON THIS APP:
   where YOU store your certificates.
   (The certificates you just made with mkcert.)
 
+
+#### the following is obsolete: we do not use the file system api anymore, since
+It's non-standard and it's not clear if it ever will be a thing outside Chrome:
+
 - Now, inside the project's top-level directory, run:
   node ./RUN-DEVELOPMENT-SERVER.js
   (and leave the terminal window open)
@@ -44,15 +48,15 @@ GENERAL INSTRUCTIONS FOR DEVELOPING - TO START DEVELOPMENT ON THIS APP:
   This should allow you to test the app locally.
 
   Note that a local HTTPS server is needed
-  for the FILE SYSTEM STANDARD API to work.
+  for the FILE SYSTEM STANDARD API / FILE SYSTEM ACCESS API
+  (whatever it's called) to work.
 
-  If you run the app by just opening the HTML file
-  or by running a local HTTP (not HTTPS) server, some parts
-  of the app may work, but the file system standard api will not!
-  This will result in save/load/export not to work (and possibly
-  other things breaking).
+  Also note that the api currently only supported on Chrome and Edge.
 
   THE ONLY RECOMMENDED WAY TO RUN THE APP LOCALLY IS VIA HTTPS!
+
+
+
 
   Note: the local HTTPS server does not auto-restart on file changes.
   If you want that feature, you would have to code it yourself

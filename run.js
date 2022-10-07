@@ -2,12 +2,21 @@
 
 const DEBUG = {}
 
+const appMetaData = {
+  appIdentifierName: "jinx", //written into save file. note that changing this
+    //will make save files from previous versions automatically incompatible.
+    //(it's better never to change this)
+  version: "0.0.1", //app version. compatibility is decided by the function
+    //isVersionNumberCompatible
+}
+
 const settings = {
   translateInterval: 500, //can be changed. how many milliseconds
     //the app waits before translating the story. as long as the user
     //types, the story is not translated. once the user stops typing,
     //this amount of time has to pass until the story is re-translated.
 }
+
 
 const temp = {
   lastTranslation: 0,
@@ -39,6 +48,8 @@ function saveSession() {
 
 function getStoryData() {
   return {
+    appName: appMetaData.appIdentifierName,
+    appVersion: appMetaData.version,
     story: codeMirror.getValue(),
     html: codeMirrorHtml.getValue(),
   }
@@ -89,6 +100,10 @@ function start() {
     loadSession(savData)
   }
 
+  $("#load-button").on("click", clickLoad)
+  $("#save-button").on("click", clickSave)
+  $("#export-button").on("click", clickExport)
+
   selectTab("story", 0)
   selectTab("play", 1)
   //selectTab("help", 1)
@@ -99,6 +114,86 @@ function start() {
 
 }
 
+
+function clickLoad() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.onchange = (e) => { 
+    const file = e.target.files[0]
+    const reader = new FileReader()
+    reader.readAsText(file, 'UTF-8')
+    reader.onload = (readerEvent) => {
+      const content = readerEvent.target.result
+      let data
+      try {
+        data = JSON.parse(content)
+      } catch(e) {
+        alert("Broken JSON. This does not seem to be a valid save file.")
+        return
+      }
+      if (data.appName !== appMetaData.appIdentifierName) {
+        alert(`This does not seem to be a valid save file.`)
+        return
+      }
+      
+      if ( !isVersionNumberCompatible(data.appVersion) ) {
+        alert(`Incompatible save file. The save file has version "${data.appVersion}", but the app `
+          + `has version "${appMetaData.version}"`)
+        return
+      }
+
+      setStoryData(data)
+    }
+  }
+  input.click()
+}
+
+function isVersionNumberCompatible(nr) {
+  return nr === appMetaData.version
+}
+
+
+function clickSave() {
+  let state = getStoryData()
+  state = JSON.stringify(state)
+  download (state, "application/json", "story-" + getFileDate() + ".json")
+}
+
+function clickExport() {
+  let html = getEntireStoryHtmlPage()
+  download (html, "text/html", "story-" + getFileDate() + ".html")
+}
+
+
+function getFileDate() {
+  function pad(num) {
+    num = String(num)
+    if (num.length === 1) return "0" + num
+    return num
+  }
+  //the date format returned should be okay for file names.
+  //that's why we do NOT use localized versions of dates.
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", ]
+
+  const dateObj = new Date()
+  const month = dateObj.getUTCMonth()
+  const nmonth = months[month]
+  const day = dateObj.getUTCDate()
+  const year = dateObj.getUTCFullYear()
+  const h = dateObj.getHours()
+  const m = dateObj.getMinutes()
+  const newDate = pad(year) + "-" + pad(nmonth) + "-" + pad(day) + "---"
+    + pad(h) + "-" + pad(m)
+  return newDate
+}
+
+
+function download(content, type, fileName) {
+  const blob = new Blob([content], {type: type + ";charset=utf-8"})
+  saveAs(blob, fileName)
+}
 
 function help() {
   const html = `Hi there!`
@@ -121,16 +216,22 @@ function translate() {
   console.log("TRANSLATING")
 
   saveSession()
+
+  let html = getEntireStoryHtmlPage() 
+  setIframeContents(html)
+  return
+}
+
+
+function getEntireStoryHtmlPage() {
   let v = codeMirror.getValue()
   v = {
     content: v,
   }
   v = "storyData = " + JSON.stringify(v)
-
   const htmlContent = codeMirrorHtml.getValue()
-  html = createHtmlTemplate(htmlContent, v)
-  setIframeContents(html)
-  return
+  let html = createHtmlTemplate(htmlContent, v)
+  return html
 }
 
 let editorChangeTimeout

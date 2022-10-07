@@ -8,6 +8,8 @@
     <title>Jinx</title>    
     <link rel="stylesheet" href="style.css">
    
+    <script src="libs/FileSaver.min.js"></script>
+
     <script src="code-mirror-lib/codemirror.js"></script>
 
     <script src="codemirror-5.65.8/addon/mode/simple.js"></script>
@@ -20,6 +22,7 @@
 
 
     <script src="cm-mode/jinx-mode.js"></script>
+
 
     <link rel="stylesheet" href="code-mirror-lib/codemirror.css">
 
@@ -52,9 +55,9 @@
         <div class="tab-content-right" id="tab-content-help"></div>
       </div>
       <div class="bottom bar">
-        <button class="bar-button">Load</button>
-        <button class="bar-button">Save</button>
-        <button class="bar-button">Export</button>
+        <button class="bar-button" id="load-button">Load</button>
+        <button class="bar-button" id="save-button">Save</button>
+        <button class="bar-button" id="export-button">Export</button>
       </div>
     </div>
 
