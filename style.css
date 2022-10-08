@@ -8,6 +8,8 @@
   --font-size: 14px;
   --mid-padding: 0px;
 
+  --play-tools-bar-height: 38px;
+
   --tab-bg: #555;
   --tab-fg: #999;
   --tab-hover-bg: #333;
@@ -80,12 +82,6 @@ body {
   display: none;  
 }
 
-#play-iframe {
-  width: 100%;
-  height: calc(100vh - var(--top-bar-height) - var(--bottom-bar-height)
-    - var(--mid-padding) - var(--mid-padding) ) !important;
-    border: none;
-}
 
 #tab-content-help {
   background: #FFF;
@@ -179,7 +175,17 @@ pre {
   border-bottom: 1px solid #999;
   border-right: 0px;
   border-left: 0px;
+  height: var(--play-tools-bar-height);
+  overflow: hidden;
 }
+
+#play-iframe {
+  width: 100%;
+  height: calc(100vh - var(--top-bar-height) - var(--bottom-bar-height)
+    - var(--mid-padding) - var(--mid-padding) ) - var(--play-tools-bar-height) !important;
+    border: none;
+}
+
 
 .play-tools-button {
   border: 1px solid #999;
