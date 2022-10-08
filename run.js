@@ -70,7 +70,7 @@ function start() {
     //is set for the SECOND(!) time. No idea how that actually makes sense, it does
     //not make sense to me. Source: own experimentation only.
 
-    
+
   codeMirror = CodeMirror(document.getElementById("tab-content-story"), {
     value: "",
     mode:  "jinx",
@@ -93,6 +93,17 @@ function start() {
     spellcheck: false,
   })
 
+  document.addEventListener('keydown', e => {
+    if ( (e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault()
+      clickSave()
+    }
+    if ( (e.ctrlKey || e.metaKey) && e.key === 'o') {
+      e.preventDefault()
+      clickLoad()
+    }
+  })
+
   codeMirrorHtml.on("change", onEditorChange)
   
   const savData = localStorage.getItem(localStorageKey)
@@ -107,7 +118,7 @@ function start() {
 
   selectTab("story", 0)
   selectTab("play", 1)
-          selectTab("help", 1)
+          //selectTab("help", 1)
   //showRunResults()
   //showPlayBox()
   initHelp()
@@ -165,7 +176,7 @@ function clickSave() {
 }
 
 function clickExport() {
-  let html = getEntireStoryHtmlPage()
+  let html = getEntireStoryHtmlPage("exported")
   download (html, "text/html", "story-" + getFileDate() + ".html")
 }
 
@@ -218,22 +229,21 @@ function translate() {
     throw new Error (`Fatal. setTimeout bug? Only ${diff} ms passed between the last two translations.`)
   }
 
-  console.log("TRANSLATING")
-
   saveSession()
 
-  let html = getEntireStoryHtmlPage() 
+  let html = getEntireStoryHtmlPage("editor")
   setIframeContents(html)
   return
 }
 
 
-function getEntireStoryHtmlPage() {
-  let v = codeMirror.getValue()
-  v = {
-    content: v,
+function getEntireStoryHtmlPage(mode) {
+  if (!mode) {
+    throw new Error(`getEntireStoryHtmlPage: no mode parameter was passed.`)
   }
-  v = "storyData = " + JSON.stringify(v)
+  let v = codeMirror.getValue()
+  v = { content: v }
+  v = `;window.$__RUNTIME_MODE = "${mode}";storyData = ` + JSON.stringify(v)
   const htmlContent = codeMirrorHtml.getValue()
   let html = createHtmlTemplate(htmlContent, v)
   return html
@@ -246,7 +256,6 @@ function onEditorChange() {
   if (editorChangeTimeout) clearTimeout(editorChangeTimeout)
   editorChangeTimeout = setTimeout(translate, settings.translateInterval)
 }
-
 
 
 function selectTab(name, dir = 1) {
@@ -284,3 +293,22 @@ function setIframeContents(html) {
 }
 
 
+function emitRuntimeMessage(message) {
+  /* This should only be called from the embedded iframe
+  to communicate with the editor. This should be the only
+  way the iframe passes data up to the editor.
+  Also, of course, if window.$__RUNTIME_MODE
+  inside the iframe is "exported" instead of "editor",
+  this should not ever be called. */
+  
+  if (message.action === "save") {
+    //pressing ctrl + s / ctrl + o inside the iframe triggers the
+    //editor's save/load functionality as well.
+    //everything else would be confusing for the user.
+    clickSave()
+  }
+  if (message.action === "load") {
+    clickLoad()
+  }
+  
+}

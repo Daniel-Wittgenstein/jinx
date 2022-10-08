@@ -6,7 +6,6 @@
 
   let story
 
-
   function onClick(event) {
     const el = event.target
     if (el.classList.contains("story-choice")) {
@@ -22,8 +21,27 @@
 
   function startP() {
     //jinx.setDebugOption("log")
+    const rmode = window.$__RUNTIME_MODE
+    console.log(`Running mode: ${rmode}`)
+
+
     document.addEventListener( "click", onClick )
 
+    document.addEventListener('keydown', e => {
+      if ( (e.ctrlKey || e.metaKey) && e.key === 's') {
+        if (rmode === "editor") {
+          e.preventDefault()
+          window.parent.window.emitRuntimeMessage({action: "save"})
+        }
+      }
+      if ( (e.ctrlKey || e.metaKey) && e.key === 'o') {
+        if (rmode === "editor") {
+          e.preventDefault()
+          window.parent.window.emitRuntimeMessage({action: "load"})
+        }
+      }
+
+    })
 
     story = createJinxStory(storyData.content, onError, onStoryEvent)
     if (story.compilationFailed) {
@@ -32,6 +50,7 @@
     console.log("%c RESTARTING STORY", "background: yellow; color: black;")
     story.restart()
   }
+  
 
   function createJinxStory(storyContent, onErrorFunc, onStoryEvent) {
     let story = jinx.createNewStory(storyContent, onErrorFunc, onStoryEvent)

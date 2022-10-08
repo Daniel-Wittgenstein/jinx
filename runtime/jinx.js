@@ -1,5 +1,19 @@
 
 /*
+
+todo:
++ once-only choices
++ if conditions for choices (on same line)
++ check if block if conditions wrap choices, is so, return error (is not allowed)
++ api to directly go to paragraph or label and start running from there
+and a js function to go to paragraph or label
+that can be called WHILE JINX IS RUNNING! -> provided by jinx for any runner to use
++ expressions between {} are evalled as JS and value is printed.
+
++ inline choices and each turn functionality are things the runner can provide.
++ they are not done by jinx
+
+
 usage:
   let str = `String containining your story in Jinx code.`
   let story = jinx.createNewStory(str, (err) => {console.log("error occurred:", err)}, storyEventFunc)
