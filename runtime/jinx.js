@@ -907,10 +907,41 @@ jinx = (function() {
 
 
   function annotateLines(lines) {
+    function getWords(text) {
+      return text.trim().split(/\s/).map(n => n.trim()).filter(n => n)
+    }
     function annotateLine(line, index) {
       //line.index = index
       if (line.type === "knot" || line.type === "label") {
-        line.name = line.text.replaceAll("=", "").trim()
+        let amount = 1
+        line.name = line.text
+        if (line.type === "knot") amount = 3
+        for (let i = 0; i < amount; i++) {
+          line.name = line.name.replace("=", "")
+        }
+        if (line.name.includes("=")) {
+          return {
+            error: true,
+            lineNr: line.lineNr,
+            lineObj: line,
+            msg: `Wrong number of equals symbols.
+              For a knot, use ===, for a label use =
+              &nbsp;&nbsp;&nbsp;&nbsp;(This error may also mean that
+              your ${line.type} name contains
+              an equals symbol - which is not allowed.)`,       
+          }
+        }
+        line.name = line.name.toLowerCase().trim()
+        const words = getWords(line.name)
+        if (words.length > 1) {
+          return {
+            error: true,
+            lineNr: line.lineNr,
+            lineObj: line,
+            msg: `A ${line.type} name can only be one word long.
+            (To improve readability, you can use underscores to separate individual words.)`,       
+          }
+        }
         let n = jumpTable[line.name]
         if (n || n === 0) return {
           error: true,
@@ -924,7 +955,17 @@ jinx = (function() {
           .replace(".", "")
           .replace("g ", "")
           .replace("goto ", "")
+          .toLowerCase()
           .trim()
+        const words = getWords(line.target)
+        if (words.length > 1) {
+          return {
+            error: true,
+            lineNr: line.lineNr,
+            lineObj: line,
+            msg: `I was expecting only one word after .goto (the name of a knot or label.)`,       
+          }
+        }
       } else if (line.type === "choice" || line.type === "gather") {
         let targetChar = "+"
         if (line.subType === "once") targetChar = "*"
