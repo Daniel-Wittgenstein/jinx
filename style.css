@@ -171,3 +171,16 @@ pre {
   padding: 6px;
   overflow: auto;
 }
+
+#play-tools-bar {
+  padding: 4px;
+  background: #555;
+  border-top: 1px solid #777;
+  border-bottom: 1px solid #999;
+  border-right: 0px;
+  border-left: 0px;
+}
+
+.play-tools-button {
+  border: 1px solid #999;
+}
