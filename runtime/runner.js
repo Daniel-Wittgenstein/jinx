@@ -60,7 +60,8 @@
   function onError(err) {
     console.log("error:", err)
     const out = `
-      <div style="background: #FFF; color: #B00; padding: 10px; font-family: sans-serif; font-size: 14px;">
+      <div style="background: #FFF; color: #B00; padding: 10px;
+      font-family: sans-serif; font-size: 14px;">
         <p>An error happened: </p>
         <p><b>${err.msg}</b></p>
         <p>Line Number: ${err.lineNr > 0 ? err.lineNr : "no line number"}</p>

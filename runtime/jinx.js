@@ -933,7 +933,8 @@ jinx = (function() {
             lineNr: line.lineNr,
             lineObj: line,
             msg: `Wrong number of equals symbols.
-              For a knot, use ===, for a label use =
+              For a knot, use === at the beginning of the line, for a label use =
+              at the beginning of the line.
               &nbsp;&nbsp;&nbsp;&nbsp;(This error may also mean that
               your ${line.type} name contains
               an equals symbol - which is not allowed.)`,       
