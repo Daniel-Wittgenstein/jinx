@@ -93,7 +93,6 @@ jinx = (function() {
       result = insertDummyLines(lines)
       if (debug.compilationTime) {console.timeEnd("insert dummy lines time")}
 
-
       if (result.error) return result
       lines = result.lines
 
@@ -134,7 +133,7 @@ jinx = (function() {
         console.timeEnd(timerString)
       }
 
-      //console.log(lines)
+      console.log("################ ALL LINES", lines)
       return {success: true}
     }
 

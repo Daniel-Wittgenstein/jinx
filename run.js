@@ -213,7 +213,7 @@
     const blob = new Blob([content], {type: type + ";charset=utf-8"})
     saveAs(blob, fileName)
   }
-
+/*
   function help() {
     const html = `Hi there!`
     const win = window.open("about:blank", "Jinx Documentation",
@@ -223,6 +223,7 @@
     //window.open('about:blank', "window", 'resizable=1,scrollbars=0,width=800,height=600');
 
   }
+*/
 
   function translate() {
     const time = + new Date()
