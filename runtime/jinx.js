@@ -847,8 +847,8 @@ jinx = (function() {
   }
 
   function checkLineSyntax(line) {
-    //return falsey value for: everything fine
-    //and string for error occurred, show this error message.
+    //return falsey value for: everything fine.
+    //return string for: error occurred, show this error message.
     //each line has to go through here
     const type = line.type
     const mustBeSingle = new Set(["else", "js", "jsend", "end", "endgame"])
@@ -856,11 +856,19 @@ jinx = (function() {
       const wordAmount = line.text.replace(".", "")
         .trim().split(" ").map(n => n.trim()).filter(n => n).length  
       if (wordAmount > 1) {
-
         return `${type} line cannot contain additional text. I saw ${wordAmount} words on that line, 
         but only the first one makes sense to me.`
       }
     }
+
+    if (type === "gather") {
+      console.log("gather", line)
+      if (line.text.replaceAll("-", "").trim() !== "") {
+        return `A gather line cannot contain additional text. I was just expecting
+        minus characters on that line, nothing else.`
+      }
+    }
+
     return false
   }
 
@@ -941,7 +949,7 @@ jinx = (function() {
             msg: `A ${line.type} name can only be one word long.
             (To improve readability, you can use underscores to separate individual words.)`,       
           }
-        }
+        }        
         let n = jumpTable[line.name]
         if (n || n === 0) return {
           error: true,
