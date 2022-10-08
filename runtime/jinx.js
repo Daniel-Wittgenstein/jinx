@@ -883,8 +883,11 @@ jinx = (function() {
       type = "make-choice"
     } else if ( firstWord === "set ") {
       type = "set"
+      type = false //currently not supported
     } else if ( firstWord === "endgame") {
       type = "end-game"
+    } else if ( firstWord === "goto" || firstWord === "g") {
+      type = "goto"
     }
     return type
   }

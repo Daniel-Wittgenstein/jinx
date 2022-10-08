@@ -96,9 +96,14 @@ window.HELP_CONTENTS = `
 
   <br>
 
-  <p>Special commands must be on their own line. They start with a dot (.)</p>
+  <p>Special commands must be on their own line. They start with a dot (.):</p>
 
   <p>.goto page_or_label_name&nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp;Jumps to the page or label.</p>
+
+  <p>.g page_or_label_name&nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp;Exactly the same as .goto, just
+  shorter to type.</p>
+
+
 
   <p>.endgame&nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp;Ends the game.</p>
 
