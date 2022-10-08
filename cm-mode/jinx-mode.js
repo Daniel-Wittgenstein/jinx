@@ -16,6 +16,7 @@ CodeMirror.defineSimpleMode("jinx", {
 
     {sol: true, regex: /\s*\*.*/, token: "choice"},
     {sol: true, regex: /\s*\+.*/, token: "choice"},
+    {sol: true, regex: /\s*\-.*/, token: "gather"},
 
 
   ],

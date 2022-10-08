@@ -1,3 +1,7 @@
+
+/* THIS IS A MODIFIED VERSION OF THE ORIGINAL CODEMIRROR CSS FILE */
+
+
 /* BASICS */
 
 .CodeMirror {
@@ -361,4 +365,6 @@ in between is styled as JavaScript: */
 .cm-s-default .cm-dot-command {color: rgb(42, 53, 156);}
 
 .cm-s-default .cm-choice {color: rgb(20, 32, 100);}
+
+.cm-s-default .cm-gather {background: rgb(255, 244, 150); color: #222}
 
