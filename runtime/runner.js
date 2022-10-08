@@ -10,7 +10,12 @@
   function onClick(event) {
     const el = event.target
     if (el.classList.contains("story-choice")) {
-      console.log(el.getAttribute("data-choiceindex"))
+      const index = Number(el.getAttribute("data-choiceindex"))
+      if (!index && index !== 0) {
+        throw new Error("Fatal: button has no valid index.")
+      }
+      document.getElementById("wrapper").innerHTML = ""
+      story.selectChoice(index)
     }
   }
 

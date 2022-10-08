@@ -14,10 +14,10 @@ jinx = (function() {
 
   const debug = {
     log: false,
-    logFlow: false,
+    logFlow: true,
     compilationTime: false,
     turtle: false,
-    turtleSpeed: 10,
+    turtleSpeed: 600,
   }
 
   const GLUESYMBOL = "<>"
@@ -151,12 +151,15 @@ jinx = (function() {
       //returns: new content to output
       //updates state according to selected choice
 
+      index = Number(index)
+
       this.previouslyExecutedLine = false
 
       if (debug.logFlow) console.log("SELECTED CHOICE", index)
       if (!this.inited) throw `Call story.restart() first.`
       
       let ch = this.choices[index]
+
       this.securityCounter = 0
 
       if (!ch) {
@@ -173,6 +176,9 @@ jinx = (function() {
     doContinueFromChoice(choice) {
       let i = choice.internalLineNr
       let line = this.lines[i]
+
+      this.lastSelectedChoice = line
+
       //console.log(choice, i , line)
       if (!line) {
         this.rtError(choice.lineNr, `Line/choice does not exist?`)
@@ -199,6 +205,7 @@ jinx = (function() {
 
     flushStoryState() {
       this.usedUpChoices = {}
+      this.lastSelectedChoice = false
     }
 
     flushGatherState() {
@@ -211,7 +218,6 @@ jinx = (function() {
       /* lineNrMode
         true (default): pass index of line in line array as first parameter
         false: pass actual line number in code
-      
       */
       let line
       if (lineNrMode) {
@@ -219,6 +225,7 @@ jinx = (function() {
       } else {
         line = this.lines.filter(l => l.lineNr === index)[0]
       }
+
       let lnr
       let legal = true
       if (line) {
@@ -274,7 +281,6 @@ jinx = (function() {
         document.body.innerHTML += `EXECUTING LINE ${line.lineNr || line.type}: ${line.text}<br>`
       }
 
-
       if (debug.log) console.log("running line", index, line)
       
       if (!line) {
@@ -298,6 +304,15 @@ jinx = (function() {
 
       if (result === "advanceByOne") {
         if (line.continuation) {
+          if (line.continuation === "no-continuation") {
+            this.rtError(-1, `The story seems to just stop here. I expected a
+              gather or a goto.
+              This happened after the choice "${this.lastSelectedChoice?.text}"
+              at line ${this.lastSelectedChoice?.lineNr}
+              was selected. 
+              `, false)
+            return
+          }
           this.pointer = line.continuation
         } else {
           this.pointer += 1
@@ -498,6 +513,7 @@ jinx = (function() {
     }
 
     execChoice(line) {
+      console.log(this.lines)
       //populate this.choices with choice objects containing choice text
       //assumes that lineNr of choice is unique, which it really should be
       //unless there is a serious bug
@@ -604,47 +620,6 @@ jinx = (function() {
 
   //####################
   //####################
-
-  function getNextLine(lines, line, lineIndex, jumpTable) {
-    //TODO TO DO: delete once everything else is done. only here for reference anymore.
-    //pass lines line and lineIndex, get back index of next line to execute
-    //returns "no-continuation" if there is no next line (flow runs out,
-    //basically; there is no gather to catch)
-    // returns "finished-collecting" if, for example it's the last choice in a knot
-    //(so a legal end-of-flow, basically)
-    //todo to do: also handle blocks: if else end for each loop js
-    if (line.continuation || line.continuation === 0) {
-      //if (debug.logFlow) console.log("line", lineIndex, "has continuation of", line.continuation)
-      return line.continuation
-    }
-    if (line.type === "choice") {
-      //search for next choice at same level
-      //until you find an element with a lower level,
-      //or a knot, or a gather with the same level
-      for (let i = lineIndex + 1; i < lines.length; i++) {
-        //console.log("query", i, lines[i])
-        let queriedLine = lines[i]
-        if (queriedLine.level < line.level ||
-          queriedLine.type === "knot" ||
-          (queriedLine.type === "gather" && queriedLine.level === line.level)
-          ) {
-          //console.log("finished collecting")
-          return "finished-collecting"
-        }
-
-        if (queriedLine.level === line.level) {
-          return i
-        }
-      }
-      return
-    }
-
-    let nextLine = lines[lineIndex + 1]
-    if (!nextLine) return "no-continuation"
-    if (nextLine.type === "knot") return "no-continuation"
-    return lineIndex + 1
-  }
-
 
 
   function annotateBlocks(lines) {
@@ -844,7 +819,7 @@ jinx = (function() {
       //lines = lines.filter( n => n ) NO! JUST NO!
     lines = lines.map ( n => {
       if (!n) return {
-        type: "empty"
+        type: "empty",
       }
       return n
     })
@@ -1075,6 +1050,7 @@ jinx = (function() {
           const entry = lastChoiceByLevel[i]
           if (!entry) break
           entry.nextChoiceOfSameLevel = "endBlock"
+          lastChoiceByLevel[i] = false
         }
       //####################################
       } else if (line.type === "knot" || index >= lines.length - 1 ) {
