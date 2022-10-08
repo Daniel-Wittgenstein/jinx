@@ -107,7 +107,7 @@ function start() {
 
   selectTab("story", 0)
   selectTab("play", 1)
-  //selectTab("help", 1)
+          selectTab("help", 1)
   //showRunResults()
   //showPlayBox()
   initHelp()
@@ -262,7 +262,7 @@ function selectTab(name, dir = 1) {
 
 
 function initHelp() {
-  const text = `Welcome to help!`.repeat(2000)
+  const text = window.HELP_CONTENTS
   $("#tab-content-help").html(text)
 }
 

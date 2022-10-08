@@ -513,7 +513,6 @@ jinx = (function() {
     }
 
     execChoice(line) {
-      console.log(this.lines)
       //populate this.choices with choice objects containing choice text
       //assumes that lineNr of choice is unique, which it really should be
       //unless there is a serious bug
@@ -789,8 +788,7 @@ jinx = (function() {
         type = "gather"
       } else if ( line.startsWith("#") ) {
         type = "single-line-js"
-      } else if ( line.startsWith(".goto ") || line.startsWith(".g ")
-        || line.startsWith("->") ) {
+      } else if ( line.startsWith(".goto ") || line.startsWith(".g ") ) {
         type = "goto"
       } else if ( line.startsWith("//") ) {
         //comment
@@ -910,7 +908,6 @@ jinx = (function() {
           .replace(".", "")
           .replace("g ", "")
           .replace("goto ", "")
-          .replace("->", "")
           .trim()
       } else if (line.type === "choice" || line.type === "gather") {
         let targetChar = "+"

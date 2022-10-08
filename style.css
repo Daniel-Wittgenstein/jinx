@@ -164,3 +164,10 @@ body {
   background: var(--tab-chosen-hover-bg) !important;
   color: var(--tab-chosen-hover-fg) !important;
 }
+
+
+pre {
+  border: 1px solid #555;
+  padding: 6px;
+  overflow: auto;
+}
