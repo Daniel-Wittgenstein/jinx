@@ -6,6 +6,8 @@
 
   let story
 
+  let mainOutputElement 
+ 
   function onClick(event) {
     const el = event.target
     if (el.classList.contains("story-choice")) {
@@ -13,7 +15,7 @@
       if (!index && index !== 0) {
         throw new Error("Fatal: button has no valid index.")
       }
-      document.getElementById("wrapper").innerHTML = ""
+      mainOutputElement.innerHTML = ""
       story.selectChoice(index)
     }
   }
@@ -21,6 +23,9 @@
 
   function startP() {
     //jinx.setDebugOption("log")
+
+    mainOutputElement = document.getElementById("main")
+
     const rmode = window.$__RUNTIME_MODE
     console.log(`Running mode: ${rmode}`)
 
@@ -93,18 +98,25 @@
       setTimeout( () => {
         let el = document.createElement("p")
         el.innerHTML = p.text
-        document.getElementById("wrapper").appendChild(el)
+        mainOutputElement.appendChild(el)
       }, delay)
       delay += delayInterval
     }
 
 
+    let index = -1
     for (let c of choices) {
       setTimeout( () => {
-        let el = document.createElement("p")
-        el.innerHTML = `<button
-          class="story-choice" data-choiceindex='${c.index}'>${c.text}</button>`
-        document.getElementById("wrapper").appendChild(el)
+        index++
+        let cl = "choice-mid"
+        if (index === 0) cl = "choice-first"
+        if (index === choices.length - 1) cl = "choice-last"
+        if (choices.length === 1) cl = "choice-only-one"        
+        let el = document.createElement("button")
+        mainOutputElement.appendChild(el)
+        el.outerHTML = `<button
+          class="story-choice ${cl}"
+          data-choiceindex='${c.index}'>${c.text}</button>`
       }, delay)
       delay += delayInterval
     }

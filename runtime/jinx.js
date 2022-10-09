@@ -926,7 +926,7 @@ jinx = (function() {
         if (line.type === "knot") amount = 3
         for (let i = 0; i < amount; i++) {
           line.name = line.name.replace("=", "")
-        }
+        } 
         if (line.name.includes("=")) {
           return {
             error: true,

@@ -65,6 +65,16 @@
 
     //console.clear()
 
+    document.getElementById("play-tools-button-fullscreen")
+      .addEventListener("click", (e) => {
+      document.getElementById("tab-content-play").requestFullscreen()
+    })
+    
+    document.getElementById("code-fullscreen-button")
+      .addEventListener("click", (e) => {
+      document.getElementById("code").requestFullscreen()
+    })
+
     setIframeContents("") //Apparently Firefox needs this. Otherwise it will initially
       //display a "page not found" message inside the iframe until the iframe content
       //is set for the SECOND(!) time. No idea how that actually makes sense, it does

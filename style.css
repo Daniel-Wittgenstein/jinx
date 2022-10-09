@@ -183,7 +183,7 @@ pre {
   width: 100%;
   height: calc(100vh - var(--top-bar-height) - var(--bottom-bar-height)
     - var(--mid-padding) - var(--mid-padding) - var(--play-tools-bar-height) ) !important;
-  border: 0px solid black;
+  border: 0px;
 }
 
 
