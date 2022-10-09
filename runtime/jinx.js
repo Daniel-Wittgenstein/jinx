@@ -507,7 +507,7 @@ jinx = (function() {
       //console.log("execIf, going to", target)
       return {jumpTo: target}
     }
-    
+     
     execElse(line) {
       //jump to corresponding end
       if (!line.correspondingEnd) throw new Error(`else has no if/end block? This should not happen.`)
