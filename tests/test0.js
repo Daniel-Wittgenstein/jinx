@@ -65,7 +65,7 @@ window.testSuite[0] = {
     },
 
     {
-      name: `6 levels nested animals`,
+      name: `six levels nested animals`,
       notes: ``,
       code: `
       What are you?

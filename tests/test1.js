@@ -21335,7 +21335,6 @@ window.testSuite[1] = {
       SKIP: 0,
       do: [
         [
-          //wrongly written test
           "PATH_A1",
           "PATH_A2",
           "PATH_A3",
@@ -21351,9 +21350,6 @@ window.testSuite[1] = {
             )
           }}
         ],
-
-
-
 
       ]
     }

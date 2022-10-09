@@ -28,7 +28,7 @@ jinx = (function() {
 
   const debug = {
     log: false,
-    logFlow: true,
+    logFlow: false,
     compilationTime: false,
     turtle: false,
     turtleSpeed: 600,
@@ -133,7 +133,6 @@ jinx = (function() {
         console.timeEnd(timerString)
       }
 
-      console.log("################ ALL LINES", lines)
       return {success: true}
     }
 
@@ -198,7 +197,7 @@ jinx = (function() {
         return
       }
 
-      console.log("doContinueFromChoice, CONTINUING AT LINE", i + 1)
+      //console.log("doContinueFromChoice, CONTINUING AT LINE", i + 1)
       this.pointer =  i + 1
       this.executeLine(this.pointer)
     }
@@ -342,13 +341,13 @@ jinx = (function() {
       }
 
       if (result === "gameEnd") {
-        console.log("%c GAME ENDED", "background: blue; color: white")
+        //console.log("%c GAME ENDED", "background: blue; color: white")
         this.onEvent("finishedCollecting")
         return
       }
 
       if (result === "stopRunning") {
-        console.log("%c STOPPED RUNNING", "background: blue; color: white")
+        //console.log("%c STOPPED RUNNING", "background: blue; color: white")
         this.onEvent("finishedCollecting")
         return
       }
@@ -488,17 +487,14 @@ jinx = (function() {
       }
       let target = false
       if (!window[str]) {
-        console.log("if condition failed")
         //condition failed:
         //jump to corresponding else, if there is one, otherwise to corresponding end
         if (line.correspondingElse) {
-          console.log("else exists", line.correspondingElse)
           target = line.correspondingElse
         } else {
           target = line.correspondingEnd
         }
       } else {
-        console.log("if condition succeeded")
         //condition succeeded
         return "advanceByOne"
       }
@@ -516,7 +512,6 @@ jinx = (function() {
       //jump to corresponding end
       if (!line.correspondingEnd) throw new Error(`else has no if/end block? This should not happen.`)
       const target = line.correspondingEnd
-      console.log("exec else jump to", target)
       return {jumpTo: target}
     }
     
@@ -571,8 +566,12 @@ jinx = (function() {
       try {
         eval(line.text)
       } catch(err) {
-        this.rtError(line.lineNr, `I executed a single JS line and ran into an error. This is the line:` +
-          `\n${line.text}`)
+        this.rtError(line.lineNr, `I executed a single JS line and ran into an error.
+          <br><br>This is the line:
+          <br>${line.text}
+          <br><br>This is the error:
+          <br>${err.message}
+          `, false)
       }
       return "advanceByOne"
     }
@@ -862,7 +861,6 @@ jinx = (function() {
     }
 
     if (type === "gather") {
-      console.log("gather", line)
       if (line.text.replaceAll("-", "").trim() !== "") {
         return `A gather line cannot contain additional text. I was just expecting
         minus characters on that line, nothing else.`

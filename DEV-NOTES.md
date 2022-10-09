@@ -68,6 +68,11 @@ It's non-standard and it's not clear if it ever will be a thing outside Chrome:
 
 ADDITIONAL NOTES:
 
+- if the runtime throws an explicable error, try clearing localStorage
+  or look at the HTML in the HTML CodeMirror editor.
+  It may just be the case that your app is injecting old/incorrect HTML
+  stored inside the localStorage from your Codemirror HTML instance.
+
 - If debugging injected iframe code in Chrome is painful (and especially
   if Chrome starts reporting wrong line numbers for errors inside the iframe!),
   try either updating your Chrome or SWITCH TO FIREFOX! I've found that Firefox

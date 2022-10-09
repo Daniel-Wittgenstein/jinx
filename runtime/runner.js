@@ -2,7 +2,37 @@
 
 ;(function() {
 
+  const variableStores = {}
+
   window.onload = startP
+
+  //provide global hooks for the story author:
+
+  const jin = {
+    createVariableStore: (key) => {
+      //creates a new global variable store for the story author
+      if (window[key]) {
+        //note: when calling this from the story, the error
+        //will be shown to the user (with correct line number)
+        throw new Error(`A variable store called "${key}" exists already.
+        (This error happened while calling the function "createVariableStore".)`)
+      }
+      const store = {
+        name: key,
+        content: {},
+      }
+      window[key] = store.content
+      variableStores[key] = store
+    },
+
+    getVariableStores: () => {
+      //author should not normally need this, but it's exposed
+      //for completeness
+      return variableStores
+    },
+  }
+
+  window.jin = jin
 
   let story
 
@@ -23,6 +53,8 @@
 
   function startP() {
     //jinx.setDebugOption("log")
+
+    jin.createVariableStore("v")
 
     mainOutputElement = document.getElementById("main")
 
