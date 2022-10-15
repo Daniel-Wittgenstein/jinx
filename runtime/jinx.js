@@ -149,7 +149,8 @@ jinx = (function() {
 
     getContents() {
       //public
-      const pars = this.internalGetParagraphs(this.paragraphBuffer)
+      let pars = this.internalGetParagraphs(this.paragraphBuffer)
+      //pars = this.convertCurly(pars) todo to do
       //console.log(pars)
       return {
         choices: this.choices,
@@ -263,10 +264,6 @@ jinx = (function() {
     capitalize(n) {
       return n.substr(0, 1).toUpperCase() + n.substr(1)
     }
-
-
-
-
 
 
     executeLine(index) {
@@ -392,7 +389,6 @@ jinx = (function() {
         return true
       })
 
-
       //3. if an empty line is preceded by a glue token,
       //remove the empty line entirely (it has no meaning. duplicate empty lines
       //should never occur, that is taken care of beforehand) same if
@@ -507,7 +503,7 @@ jinx = (function() {
       //console.log("execIf, going to", target)
       return {jumpTo: target}
     }
-     
+    
     execElse(line) {
       //jump to corresponding end
       if (!line.correspondingEnd) throw new Error(`else has no if/end block? This should not happen.`)

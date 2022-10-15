@@ -60,6 +60,7 @@
     codeMirrorHtml.setValue(state.html)
   }
 
+  let IS_FULLSCREEN = false
 
   function start() {
 
@@ -67,7 +68,13 @@
 
     document.getElementById("play-tools-button-fullscreen")
       .addEventListener("click", (e) => {
-      document.getElementById("tab-content-play").requestFullscreen()
+      if (IS_FULLSCREEN) {
+        IS_FULLSCREEN = false
+        document.exitFullscreen()
+      } else {
+        IS_FULLSCREEN = true
+        document.getElementById("tab-content-play").requestFullscreen()
+      }
     })
     
     document.getElementById("code-fullscreen-button")
