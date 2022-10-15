@@ -147,7 +147,7 @@
   }
 
   function clickAbout() {
-    alert(`JinxEdit version "${appMetaData.version}"`)
+    alert(`JinxEdit version ${appMetaData.version}`)
   }
 
 
