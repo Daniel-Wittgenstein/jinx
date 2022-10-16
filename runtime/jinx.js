@@ -2,14 +2,19 @@
 /*
 
 todo:
++ if conditions for choices: test thoroughly
++ <<>> text replacements should work for choices, too
 + once-only choices
-+ if conditions for choices (on same line)
-+ check if block if conditions wrap choices, is so, return error (is not allowed)
++ check if block if conditions wrap choices, if so, return error (is not allowed)
 + api to directly go to paragraph or label and start running from there
 and a js function to go to paragraph or label
 that can be called WHILE JINX IS RUNNING! -> provided by jinx for any runner to use
-+ expressions between {} are evalled as JS and value is printed.
 
+done:
++ expressions between {} are evalled as JS and value is printed.
++ if conditions for choices (on same line)
+
+notes:
 + inline choices and each turn functionality are things the runner can provide.
 + they are not done by jinx
 
@@ -121,6 +126,11 @@ jinx = (function() {
       lines = annotateChoices(lines)
       if (lines.error) return lines
       if (debug.compilationTime) {console.timeEnd("annotate choices")}
+      
+      if (debug.compilationTime) {console.time("process choices")}
+      lines = processChoices(lines)
+      if (lines.error) return lines
+      if (debug.compilationTime) {console.timeEnd("process choices")}
 
       if (debug.compilationTime) {console.time("annotate blocks")}
       lines = annotateBlocks(lines)
@@ -578,8 +588,9 @@ jinx = (function() {
 
     execChoice(line) {
       //populate this.choices with choice objects containing choice text
-      //assumes that lineNr of choice is unique, which it really should be
-      //unless there is a serious bug
+      //(for once-only choices, future: assumes that lineNr of choice is unique,
+      //which it really should be
+      //unless there is a serious bug)
 
       if (this.previouslyExecutedLine && this.previouslyExecutedLine.level !==
         line.level) {
@@ -601,8 +612,28 @@ jinx = (function() {
         index: this.choices.length,
         internalLineNr: line.internalLineNr,
       }
-      this.choices.push(choice)
 
+      let conditionOk = true
+
+      if (line.ifCondition) {
+        conditionOk = false
+        const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€xXyY` //prevent collision
+        window[str] = false
+        try {
+          eval (`window["${str}"] = ( ` + line.ifCondition + " )" )
+        } catch(err) {
+          this.rtError(line.lineNr, `choice: if condition: JavaScript threw an error. Is 
+            this a valid expression?
+            <br>${err}`, false)
+          return "stopRunning"
+        }
+        conditionOk = window[str]
+      }
+
+      if (conditionOk) {
+        this.choices.push(choice)
+      }
+      
 
       if (line.nextChoiceOfSameLevel === "endBlock") {
         return "stopRunning"
@@ -1098,6 +1129,39 @@ jinx = (function() {
     return lines
   }
 
+  function processChoices(lines) {
+    let error = false
+    lines = lines.map (line => {
+      if (error) return line
+      if (line.type === "choice") {
+        const text = line.text.trim()
+        if (text.startsWith("(")) {
+          if (text.replace("(", "").trim().startsWith("if ")) {
+            const index = line.text.indexOf(")")
+            if (index === -1) {
+              error = {
+                error: true,
+                lineNr: line.lineNr,
+                msg: `Choice with if-condition: I am missing
+                a closing bracket ) for 
+                the if-condition.`,
+              }
+              return line
+            }
+            const part1 = line.text.substr(0, index + 1)
+            const part2 = line.text.substr(index + 1)
+            line.ifCondition = part1.replace("if", "")
+            line.text = part2
+            return line
+          }
+        }
+      }
+      return line
+    })
+    if (error) return error
+    return lines
+  }
+
   function annotateChoices(lines) {
     /* 
       Here's what happens:
@@ -1107,7 +1171,7 @@ jinx = (function() {
       - l is the level of this choice
       - all choices with level higher than l (so 3, 4, 5 etc.,
       if choice is 2, for example) in the hashmap get a nextChoiceOfSameLevel
-      of "endBlock", because they are the last choices in their block,
+      property of "endBlock", because they are the last choices in their block,
       since the lower-level choice indicated that their block was closed.
       - if the hashmap entry lastChoiceOfLevel[l]
         points to a choice, then that choice gets nextChoiceOfSameLevel = the current index
@@ -1116,13 +1180,12 @@ jinx = (function() {
 
       If we meet a gather:
       - l is the level of the gather
-      - all choices in the hashmap with level higher than l OR EQUAL TO l get a nextChoiceOfSameLevel
-        of "endBlock"
+      - all choices in the hashmap with level higher than l OR EQUAL TO l get a
+      property nextChoiceOfSameLevel of "endBlock"
       
       If we meet a knot start:
       - clear the hashmap
 
-      No idea, if this approach is correct. Implement and test.
     */
 
     let i = -1

@@ -223,12 +223,34 @@ window.HELP_CONTENTS = `
     in which case nothing is displayed (same as returning an empty string)).
   </p>
 
+  <br>
+
+  <p>
+  While you can display a variable's value with &lt;&lt;v.variableName>> just fine (see above),
+  there is a shorter way that saves you a bit of typing.
+  You can use a %:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;You have %v.flowers flowers. Your money: %v.money. Stamina: %v.stamina% - Health: %v.health%<br>
+  There must be no space between the % and the variable name.<br>
+  (Note how the dot after money is fine. Jinx does the right thing.
+    Same for the % symbol after "v.stamina" and "v.health". It's actually
+    printed as  % symbol, because it's not followed by a word.)<br>
+  </p>
+
   <h2>Known bugs and limitations</h2>
 
   <ul>
     <li>If an HTML tag spans several lines, it will not be highlighted correctly
     in the editor. Don't let this fool you: it will still work in the game.</li> 
 
+    <li>js/jsend is not implemented yet. Neither is %v.variable</li>
+
+
+    If you just add a feature to << >> that if it starts with say *
+    that char is stripped and it means: no output, then
+    you can forget about js /jsend and use
+    <<>> to run js blocks. well, not rly no, because
+    empty lines are not allowed. so no, do not do that.
+    implement js/jsend normally, it's useful and good.
 
   </ul>
 `
