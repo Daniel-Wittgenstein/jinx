@@ -165,6 +165,72 @@ window.HELP_CONTENTS = `
 
   <p>Label and page names must be unique.</p>
 
+  <br>
+
+  <p>Single angle brackets (< and >; lesser than and greater than symbols) are used for the following
+  two things:
+  </p>
+
+  <p>1.) &lt;&gt; is a glue token (see above.)</p>
+
+  <p>2.) Tags with single angle brackets are HTML tags. For example:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;This is &lt;b&gt;bold&lt;/b&gt; text.
+  <br>... will result in this display:<br>&nbsp;&nbsp;&nbsp;&nbsp;This is <b>bold</b> text.</p>
+  
+
+  <p>Double angle brackets (<< >>) are very versatile. They can do the following things:</p>
+
+  <p>1.) You can use them to print the value of a variable:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;You have  &lt;&lt;v.flowers&gt;&gt; flowers.<br>
+    ... will print (assuming that the value of v.flowers is 4):<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;You have 4 flowers.
+  </p>
+
+  <p>
+    2.) You can do a calculation and print the result:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;You have &lt;&lt;2 + 5 * v.flowers>> flowers.<br>
+    Assuming that v.flowers is still 4, this would print "You have 22 flowers." (2 plus 5 times 4)
+  </p>
+
+  <p>
+    3.) Any function that returns a string or a number can be used to print something. Example:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;You roll the die. The result is &lt;&lt;jin.rnd(1,6)>>.<br>
+    This works by calling the built-in function "jin.rnd". The function jin.rnd
+    returns a random integer number between two values (It basically works
+    like a dice roll). The &lt;&lt; and >> tell Jinx to
+    compute the number and display it.
+  </p>
+
+  <p>
+    4.) Angle brackets can also be used to add quick <em>inline</em> if-conditions.
+    These are less readable than the standard (non-inline) if-conditions (see above), so
+    use them with care. An inline if-condition MUST HAVE an else part (the else part is
+    not optional, unlike with standard if conditions.) Example:<br>
+    Your pet << v.animalType == "cat" ? "purrs" : "barks">> loudly.<br>
+    The part before the question mark is the condition. The part after
+    the question mark is the text that is displayed if the condition matches
+    (do not forget the quotes around it). Finally, the text after the colon,
+    is the "else" text, i.e. the text that is displayed if the condition does not match.
+  </p>
+
+
+  <p>
+    5.) For advanced users: You can actually put any JavaScript
+    expression between the &lt;&lt; and the &gt;&gt;.
+    (The expression can even be multiline, as long as there are no empty lines in it).
+    The <em>return value</em> of the expression becomes the text to be displayed.
+    (The return value should be a number or a string. It can also be null,
+    in which case nothing is displayed (same as returning an empty string)).
+  </p>
+
+  <h2>Known bugs and limitations</h2>
+
+  <ul>
+    <li>If an HTML tag spans several lines, it will not be highlighted correctly
+    in the editor. Don't let this fool you: it will still work in the game.</li> 
+
+
+  </ul>
 `
 
 

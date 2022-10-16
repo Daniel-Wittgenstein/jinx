@@ -146,12 +146,70 @@ jinx = (function() {
       if (!this.inited) throw `Call story.restart() first.`  
     }
 
+    convertInlineJs(pars) {
+      function convertItem(paragraph) {
+        if (errorHappened) return
+        let text = paragraph.text
+        const parts = utils.splitIntoPartsByStartAndEndTags(text, "<<", ">>")
+        if (parts.error) {
+          errorHappened = true
+          const msg = {
+            "nested": `You cannot nest inline << >> blocks. I found a << or a >> inside
+            another << >> block.`,
+            "unclosed": `Unclosed << block. An inline block starting with << must be 
+            closed with >>. They also must be in the same text block. (No empty lines in between.)`,
+            "closed": `I found >>, which tells me to close an inline block, but
+            I never found the opening << sequence. Note that the opening << and the closing
+            >> must be in the same text block (no empty lines in between).`,            
+          }[parts.code]
+          const msg2 = `The error occurred in the text block that ENDS with line ${paragraph.lineNr}.`
+          that.rtError(paragraph.lineNr, msg + " " + msg2, false)
+          return
+        }
+
+        let out = ""
+        for (let part of parts) {
+          if (part.inside) {
+            const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€xX` //prevent collision
+            window[str] = false
+            try {
+              eval (`window["${str}"] = ( ` + part.text + " )" )
+            } catch(err) {
+              errorHappened = true
+              that.rtError(paragraph.lineNr, `<< >> block: JavaScript threw an error. Is 
+                this a valid expression? This happened in the text block that ENDS with line
+                ${paragraph.lineNr}.
+                <br>${err}`, false)
+              return
+            }
+            const result = window[str]
+            if (result || result === 0) {
+              out += result
+            }
+          } else {
+            out += part.text
+          }
+        }
+        return {
+          text: out,
+        }
+      }
+      const that = this
+      let errorHappened = false
+      pars = pars.map( function (p) {return convertItem(p)} )
+      if (errorHappened) return false
+      return pars
+    }
 
     getContents() {
       //public
+
       let pars = this.internalGetParagraphs(this.paragraphBuffer)
-      //pars = this.convertCurly(pars) todo to do
-      //console.log(pars)
+      pars = this.convertInlineJs(pars)
+      if (!pars) return {
+        error: true, //error occurred. rtError has already been issued.
+      }
+
       return {
         choices: this.choices,
         paragraphs: pars,
@@ -419,6 +477,7 @@ jinx = (function() {
         if (item.type === "text") {
           const currentParagraph = paragraphs[paragraphs.length - 1]
           currentParagraph.text += item.text + " "
+          currentParagraph.lineNr = item.lineNr
         } else if (item.type === "empty-line") {
           paragraphs.push({text: ""})
         } else if (item.type === "glue") {
@@ -427,8 +486,9 @@ jinx = (function() {
             if (currentParagraph.text[currentParagraph.text.length - 1] !== " ") {
               throw new Error `Glue error. Paragraph should end with space.`
             }
-            currentParagraph.text = currentParagraph.text.substr(0, currentParagraph.text.length - 1) //VS code
-            //likes to strike-through the substr, but that's nonsense.
+            currentParagraph.text = currentParagraph.text
+              .substr(0, currentParagraph.text.length - 1) //VS code
+              //likes to strike-through the substr, but that's nonsense.
           }
         } else {
           throw new Error("Illegal paragraph type.")
@@ -461,7 +521,7 @@ jinx = (function() {
         endGlue = true
       }
       if (startGlue) this.paragraphBuffer.push({type: "glue"})
-      this.paragraphBuffer.push({type: "text", text})
+      this.paragraphBuffer.push({type: "text", text, lineNr: line.lineNr})
       if (endGlue) this.paragraphBuffer.push({type: "glue"})
       return "advanceByOne"
     }
@@ -562,7 +622,7 @@ jinx = (function() {
       try {
         eval(line.text)
       } catch(err) {
-        this.rtError(line.lineNr, `I executed a single JS line and ran into an error.
+        this.rtError(line.lineNr, `I executed a single JavaScript line and ran into an error.
           <br><br>This is the line:
           <br>${line.text}
           <br><br>This is the error:
@@ -594,8 +654,6 @@ jinx = (function() {
     execGather(line) {
       return "advanceByOne"
     }
-
-    
 
     execVoid() {
       //dummy lines. do absolutely nothing

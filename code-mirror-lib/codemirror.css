@@ -356,6 +356,14 @@ span.CodeMirror-selectedtext { background: none; }
 in between is styled as JavaScript: */
 .cm-s-default .cm-multi-line-js {background: #a50; color: white;}
 
+/* this only styles the << and >>. everything
+in between is styled as JavaScript: */
+.cm-s-default .cm-inline-js {color: #a50}
+
+.cm-s-default .cm-glue {color: rgb(32, 73, 151);}
+
+.cm-s-default .cm-html-tag {color: rgb(46, 124, 59);}
+
 .cm-s-default .cm-single-line-js {color: #a50;}
 
 .cm-s-default .cm-knot-heading {color: rgb(34, 117, 18);}

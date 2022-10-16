@@ -30,7 +30,10 @@
       //for completeness
       return variableStores
     },
-  }
+
+    
+
+  } //jin end
 
   window.jin = jin
 
@@ -120,6 +123,7 @@
 
   function renderStuff() {
     let contents = story.getContents()
+    if (contents && contents.error) return
     let choices = contents.choices
     let paragraphs = contents.paragraphs
     let delay = 0
@@ -156,3 +160,4 @@
   }
 
 })()
+
