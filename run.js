@@ -276,7 +276,6 @@
     }
   }
 
-
   function createDebugTableFromTranspiledLines(code, lines) {
     function escapeHtml(html) {
       return html.replaceAll('&', '&amp;')
@@ -313,11 +312,9 @@
     }
     /* takes line object array, returns HTML as string */
     const orgLines = code.split("\n")
-    console.log(orgLines, lines)
     let previousLineNr = 0
     let out = ""
     for (let line of lines) {
-      console.log("LINE", line)
       if (line.lineNr && line.lineNr !== previousLineNr) {
         out += "<br>LINE <span style='color:blue'>" + line.lineNr + "</span><br>"
         let org = orgLines[line.lineNr - 1]

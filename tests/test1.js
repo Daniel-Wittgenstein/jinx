@@ -20,11 +20,11 @@ For faster copying:
 */
 
 
-
 window.testSuite[1] = {
   name: "Test Suite 1",
   notes: "Over 21,000 nested choices. This takes over 10 seconds to compile on an old laptop with Firefox. "+
-    `The bottleneck is the annotateGathers function. It's a bit of an excessive example, though, to be fair. `,
+    `The bottleneck is the annotateGathers function. It's a bit of an excessive example, though, to be fair. 
+    currently passing.`,
   tests: [
 
 

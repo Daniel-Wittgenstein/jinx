@@ -34,9 +34,9 @@ jinx = (function() {
   const debug = {
     log: false,
     logFlow: true,
-    compilationTime: false,
-    turtle: false,
-    turtleSpeed: 600,
+    compilationTime: 0,
+    turtle: 0,
+    turtleSpeed: 0,
   }
 
   const GLUESYMBOL = "<>"
@@ -137,6 +137,10 @@ jinx = (function() {
       if (lines.error) return lines
       if (debug.compilationTime) {console.timeEnd("annotate blocks")}
 
+      if (debug.compilationTime) {console.time("block integrity check")}
+      this.checkBlockIntegrity(lines)
+      if (debug.compilationTime) {console.timeEnd("block integrity check")}
+
       this.lines = lines
 
       if (debug.compilationTime) {
@@ -144,6 +148,39 @@ jinx = (function() {
       }
 
       return {success: true}
+    }
+
+    checkBlockIntegrity(lines) {
+      //this is just an additional check to
+      //help catch bugs early. the performance penalty should not
+      //be too big. If it proves to be big, though, you can remove
+      //this check. Otherwise leave it in for more security.
+      for (const line of lines) {
+        for (const key of ["correspondingIf", "correspondingElse",
+            "correspondingEnd"]) {
+          if (line[key] !== undefined) {
+            const targetLine = lines[Number(line[key])]
+            if (!targetLine) {
+              console.log("ERROR at line: ", line, `line.${key} 
+                does not point to a valid line. This should never happen.
+                line.${key} === ${targetLine}`)
+              throw new Error (`Fatal error. See console.log above.`)
+            }
+
+            let err = false
+            if (key === "correspondingIf" && targetLine.type !== "if") err = true
+            if (key === "correspondingElse" && targetLine.type !== "else") err = true
+            if (key === "correspondingEnd" && targetLine.type !== "end") err = true
+            if (err) {
+              console.log("error at line:", line)
+              throw new Error(`Fatal error. line.${key} does NOT point to an
+                ${key.replace("corresponding", "").toLowerCase()} line.
+                See console.log above.`)
+            }
+
+          }
+        }
+      }
     }
 
     setState() {
@@ -561,7 +598,7 @@ jinx = (function() {
         //condition failed:
         //jump to corresponding else, if there is one, otherwise to corresponding end
         if (line.correspondingElse) {
-          target = line.correspondingElse
+          target = line.correspondingElse + 1
         } else {
           target = line.correspondingEnd
         }
@@ -783,10 +820,11 @@ jinx = (function() {
             error: true,
             lineNr: line.lineNr,
             lineObj: line,
-            msg: `I found an ".else" line, but there was no ".if" line before that, so it makes no sense to me.`,
+            msg: `I found an ".else" line, but there was no ".if" line before that, so it
+              makes no sense to me.`,
           }
         }
-        lastLine.correspondingElse = line.lineNr
+        lastLine.correspondingElse = line.internalLineNr
         lastLine.correspondingElseObj = line
         if (lastLine.type !== "if") {
           return {
@@ -796,7 +834,7 @@ jinx = (function() {
             msg: `".else" may only appear inside an ".if" block`,
           }
         }
-        line.correspondingIf = lastLine.lineNr
+        line.correspondingIf = lastLine.internalLineNr
       } else if (t === "end" || t === "js-end") {
         let lastLine = stack[stack.length - 1]
         if (!lastLine) {
@@ -804,7 +842,8 @@ jinx = (function() {
             error: true,
             lineNr: line.lineNr,
             lineObj: line,
-            msg: `I found an ".end" or ".jsend" line, but there was no block to close, so it makes no sense to me.`,
+            msg: `I found an ".end" or ".jsend" line, but there was no block
+              to close, so it makes no sense to me.`,
           }
         }
         if (t === "js-end" && lastLine.type !== "js-start") {
@@ -832,14 +871,14 @@ jinx = (function() {
           }  
         }
         let last = stack.pop()
-        last.correspondingEnd = line.lineNr
+        last.correspondingEnd = line.internalLineNr
         if ( t === "end" ) {
           const lastIf = last
           if (lastIf.correspondingElseObj) {
             console.log("ATTACHING PROPERTY CORRESPONDINGEND TO ELEMENT:", 
             lastIf.correspondingElseObj, "this number:",
             line.lineNr)
-            lastIf.correspondingElseObj.correspondingEnd = line.lineNr
+            lastIf.correspondingElseObj.correspondingEnd = line.internalLineNr
             delete lastIf.correspondingElseObj //not needed anymore
           }
         }
@@ -865,7 +904,7 @@ jinx = (function() {
 
 
     return lines
-  }
+  } //annotateBlocks
 
 
   function tokenize(str) {

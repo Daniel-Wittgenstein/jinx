@@ -2,7 +2,7 @@
 
 window.testSuite[3] = {
   name: "Test Suite 3",
-  notes: "max recursion breakage. currently this test does NOT pass. but it should.",
+  notes: "max recursion breakage. currently passing.",
   tests: [{
     name: "max recursion breakage",
     notes: "",

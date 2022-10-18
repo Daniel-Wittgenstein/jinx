@@ -2,7 +2,7 @@
 
 window.testSuite[2] = {
   name: "Test Suite 2",
-  notes: "more tests",
+  notes: "more tests. currently passing.",
   tests: [{
     name: "if conditions",
     notes: "",
@@ -83,6 +83,7 @@ window.testSuite[2] = {
       do: [
         [
           {assert: () => {
+            console.log(window.item, window.v)
             return (
 
               window.item.bottle === 1 &&

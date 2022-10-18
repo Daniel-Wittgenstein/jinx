@@ -25,7 +25,7 @@ window.testSuite = []
 
 window.testSuite[0] = {
   name: "Test Suite 0",
-  notes: "Some standard flow tests.",
+  notes: "Some standard flow tests. currently passing.",
   tests: [
     
     {
