@@ -33,7 +33,7 @@ jinx = (function() {
 
   const debug = {
     log: false,
-    logFlow: false,
+    logFlow: true,
     compilationTime: false,
     turtle: false,
     turtleSpeed: 600,
@@ -358,6 +358,11 @@ jinx = (function() {
         document.body.innerHTML += `EXECUTING LINE ${line.lineNr || line.type}: ${line.text}<br>`
       }
 
+      if (debug.logFlow) {
+        console.log(`↪ EXECUTING LINE ${line.lineNr} ${line.type}: ${line.text}`,
+        "this.securityCounter:", this.securityCounter)
+      }
+
       if (debug.log) console.log("running line", index, line)
       
       if (!line) {
@@ -577,7 +582,12 @@ jinx = (function() {
     execElse(line) {
       //jump to corresponding end
       if (!line.correspondingEnd) throw new Error(`else has no if/end block? This should not happen.`)
+      
+      console.log("IAM Else LINE", line)
       const target = line.correspondingEnd
+      if (debug.logFlow) {
+        console.log("ELSE TARGET IS:", target)
+      }
       return {jumpTo: target}
     }
     
@@ -719,6 +729,8 @@ jinx = (function() {
 
 
   function annotateBlocks(lines) {
+    //todo to do: wrong. uses lineNr. should use internalLineNr???
+    
     function An(str) {
       const char = str.substr(0, 1).toLowerCase()
       if (["a", "e", "i", "o", "u"].includes(char)) {
@@ -824,6 +836,9 @@ jinx = (function() {
         if ( t === "end" ) {
           const lastIf = last
           if (lastIf.correspondingElseObj) {
+            console.log("ATTACHING PROPERTY CORRESPONDINGEND TO ELEMENT:", 
+            lastIf.correspondingElseObj, "this number:",
+            line.lineNr)
             lastIf.correspondingElseObj.correspondingEnd = line.lineNr
             delete lastIf.correspondingElseObj //not needed anymore
           }
@@ -854,21 +869,13 @@ jinx = (function() {
 
 
   function tokenize(str) {
-    let lastLineWasEmpty = false
     let lines = str.split("\n").map( (line, i) => {
       let type = false
       let subType = false
       line = line.trim()
 
       if (line === "") {
-        if (lastLineWasEmpty) {
-          return false
-        } else {
-          lastLineWasEmpty = true
-          type = "empty"
-        }
-      } else {
-        lastLineWasEmpty = false
+        type = "empty"
       }
 
       if ( line.startsWith("===") ) {
@@ -912,12 +919,12 @@ jinx = (function() {
       }
     })
       //lines = lines.filter( n => n ) NO! JUST NO!
-    lines = lines.map ( n => {
+    /*lines = lines.map ( n => {
       if (!n) return {
         type: "empty",
       }
       return n
-    })
+    })*/
     for (let line of lines) {
       const res = checkLineSyntax(line)
       if (res) return {

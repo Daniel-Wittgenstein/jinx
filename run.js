@@ -135,13 +135,15 @@
     $("#save-button").on("click", clickSave)
     $("#export-button").on("click", clickExport)
     $("#about-button").on("click", clickAbout)
+    initHelp()
 
     selectTab("story", 0)
-    selectTab("play", 1)
-            //selectTab("help", 1)
+    
+    
+            selectTab("debug", 1) //testing
+
     //showRunResults()
     //showPlayBox()
-    initHelp()
     ////translate()
 
   }
@@ -250,9 +252,83 @@
       throw new Error (`Fatal. setTimeout bug? Only ${diff} ms passed between the last two translations.`)
     }
     saveSession()
-    injectStoryIntoIframe()
+    if (selectedTab.right === "debug") {
+      const outputEl = $("#tab-content-debug")
+      console.log(selectedTab)
+      const code = codeMirror.getValue()
+      const onErr = (err) => {
+        console.log("ERROR FROM DEBUG TST TRANSPILATION:", err)
+        outputEl.html(`Compilation failed. Note that the play tab shows
+        more accurate error information.<br><br>` +
+        "an error occurred: " + err.msg + " / line nr:" + err.lineNr + "<br><br>")
+      }
+      const onEv = (ev) => {
+        console.log("EVENT FROM DEBUG TST TRANSPILATION:", ev)
+      }
+      let out = `Compilation succeeded. This is the result of the compilation:<br><br>`
+      outputEl.html(out) //yes, before we create the story!
+      const story = jinx.createNewStory(code, onErr, onEv)
+      if (!story.lines) return
+      const out2 = createDebugTableFromTranspiledLines(code, story.lines)
+      outputEl.append(out2)
+    } else {
+      injectStoryIntoIframe()
+    }
   }
 
+
+  function createDebugTableFromTranspiledLines(code, lines) {
+    function escapeHtml(html) {
+      return html.replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll(' ', '<span style="background: #DDD; color: #333">&nbsp;</span>')
+        
+    }
+    function getHtmlFromLine(line) {
+      let out = "{ "
+      let index = -1
+      for ( let key of Object.keys(line) ) {
+        index++
+        const prop = line[key]
+        let s
+        if (utils.isString(prop)) {
+          s = '"' + prop + '"'
+        } else {
+          s = prop
+        }
+        s = escapeHtml(s + "")
+        let col = "black"
+        if (key === "internalLineNr" ||
+          key == "correspondingIf" ||
+          key == "correspondingElse" ||
+          key == "correspondingEnd"
+        ) col = "#820"
+        if (key === "lineNr") col = "blue"
+        let comma = ", "
+        if (index === Object.keys(line).length - 1) comma = " }"
+        out += `<span style='color: ${col}'>` + escapeHtml(key) + ": " + s +  "</span>" + comma
+      }
+      return out
+    }
+    /* takes line object array, returns HTML as string */
+    const orgLines = code.split("\n")
+    console.log(orgLines, lines)
+    let previousLineNr = 0
+    let out = ""
+    for (let line of lines) {
+      console.log("LINE", line)
+      if (line.lineNr && line.lineNr !== previousLineNr) {
+        out += "<br>LINE <span style='color:blue'>" + line.lineNr + "</span><br>"
+        let org = orgLines[line.lineNr - 1]
+        out += (escapeHtml(org) || `<span style='font-style:italic; color: #777;
+          '>--EMPTY LINE--</span>`) + "<br>"
+      }
+      out += getHtmlFromLine(line) + "<br>"
+      previousLineNr = line.lineNr
+    }
+    return out
+  }
 
   function injectStoryIntoIframe() {
     let html = getEntireStoryHtmlPage("editor")
@@ -281,6 +357,7 @@
     editorChangeTimeout = setTimeout(translate, settings.translateInterval)
   }
 
+  let selectedTab = {}
 
   window.selectTab = function(name, dir = 1) {
     let area = "left"
@@ -290,6 +367,7 @@
     const target = "#tab-content-" + name
     $(".tab-content-" + area).hide()
     $(target).show()
+    selectedTab[area] = name 
   }
 
 

@@ -11,11 +11,11 @@
   --play-tools-bar-height: 38px;
 
   --tab-bg: #555;
-  --tab-fg: #999;
+  --tab-fg: #ccc;
   --tab-hover-bg: #333;
   --tab-hover-fg: #CCC;
 
-  --tab-chosen-bg: #CCC;
+  --tab-chosen-bg: #ddd;
   --tab-chosen-fg: #222;
   --tab-chosen-hover-bg: #CCC;
   --tab-chosen-hover-fg: #222;
@@ -189,4 +189,12 @@ pre {
 
 .play-tools-button {
   border: 1px solid #999;
+}
+
+
+#tab-content-debug {
+  background: #FFF;
+  color: #222;
+  padding: 12px;
+  overflow: auto;
 }

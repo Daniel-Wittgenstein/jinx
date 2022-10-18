@@ -36,6 +36,7 @@
       <div class="tab-bar" id="tab-bar">
         <div class="tab tab-right tab-chosen" id="tab-play" onclick="selectTab('play', 1)">Play</div>
         <div class="tab tab-right" id="tab-help" onclick="selectTab('help', 1)">Help</div>
+        <div class="tab tab-right" id="tab-debug" onclick="selectTab('debug', 1)">Debug</div>
       </div>
 
 
@@ -54,6 +55,7 @@
           <div id="run-results"></div>
         </div>
         <div class="tab-content-right" id="tab-content-help"></div>
+        <div class="tab-content-right" id="tab-content-debug"></div>
       </div>
       <div class="bottom bar">
         <button class="bar-button" id="load-button">Open</button>
@@ -63,6 +65,8 @@
         <button class="bar-button" id="about-button">?</button>
       </div>
     </div>
+
+    <script src="runtime/jinx.js"></script> <!-- We need this only for debugging purposes. -->
 
     <script src="jquery-3.3.1.min.js"></script>
 
