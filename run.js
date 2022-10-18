@@ -140,7 +140,7 @@
     selectTab("story", 0)
     
     
-            selectTab("debug", 1) //testing
+            //selectTab("debug", 1) //testing
 
     //showRunResults()
     //showPlayBox()
@@ -254,7 +254,6 @@
     saveSession()
     if (selectedTab.right === "debug") {
       const outputEl = $("#tab-content-debug")
-      console.log(selectedTab)
       const code = codeMirror.getValue()
       const onErr = (err) => {
         console.log("ERROR FROM DEBUG TST TRANSPILATION:", err)

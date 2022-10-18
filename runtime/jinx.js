@@ -33,7 +33,7 @@ jinx = (function() {
 
   const debug = {
     log: false,
-    logFlow: true,
+    logFlow: 0,
     compilationTime: 0,
     turtle: 0,
     turtleSpeed: 0,
@@ -766,7 +766,6 @@ jinx = (function() {
 
 
   function annotateBlocks(lines) {
-    //todo to do: wrong. uses lineNr. should use internalLineNr???
     
     function An(str) {
       const char = str.substr(0, 1).toLowerCase()
@@ -875,9 +874,6 @@ jinx = (function() {
         if ( t === "end" ) {
           const lastIf = last
           if (lastIf.correspondingElseObj) {
-            console.log("ATTACHING PROPERTY CORRESPONDINGEND TO ELEMENT:", 
-            lastIf.correspondingElseObj, "this number:",
-            line.lineNr)
             lastIf.correspondingElseObj.correspondingEnd = line.internalLineNr
             delete lastIf.correspondingElseObj //not needed anymore
           }
