@@ -139,7 +139,6 @@
       delay += delayInterval
     }
 
-
     let index = -1
     for (let c of choices) {
       setTimeout( () => {

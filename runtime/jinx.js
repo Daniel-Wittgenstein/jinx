@@ -2,13 +2,14 @@
 /*
 
 todo:
-+ if conditions for choices: test thoroughly
 + <<>> text replacements should work for choices, too
 + once-only choices
 + check if block if conditions wrap choices, if so, return error (is not allowed)
 + api to directly go to paragraph or label and start running from there
 and a js function to go to paragraph or label
 that can be called WHILE JINX IS RUNNING! -> provided by jinx for any runner to use
++ runner api stuff
++ if conditions for choices: test thoroughly
 
 done:
 + expressions between {} are evalled as JS and value is printed.
@@ -193,52 +194,72 @@ jinx = (function() {
       if (!this.inited) throw `Call story.restart() first.`  
     }
 
+    evalText(text) {
+      /* evals string containing << >> parts
+      and returns new string.
+      Because the parts with << >> can contain
+      arbitrary JS, this can totally perform side-effects.
+      This should only be called on text
+      that is printed shortly after that.
+      Calling this on text that is not displayed to the player
+      should not be done.
+      */
+      const parts = utils.splitIntoPartsByStartAndEndTags(text, "<<", ">>")
+      if (parts.error) {
+        const msg = {
+          "nested": `You cannot nest inline << >> blocks. I found a << or a >> inside
+            another << >> block.`,
+          "unclosed": `Unclosed << block. An inline block starting with << must be 
+            closed with >>. They also must be in the same text block. (No empty lines in between.)`,
+          "closed": `I found >>, which tells me to close an inline block, but
+            I never found the opening << sequence. Note that the opening << and the closing
+            >> must be in the same text block (no empty lines in between).`,            
+        }[parts.code]
+        const msg2 = `The error occurred in XXX`
+        return {error: true, msg: msg + msg2}
+      }
+      let out = ""
+      for (let part of parts) {
+        if (part.inside) {
+          const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€xX` //prevent collision
+          window[str] = false
+          try {
+            if (part.text.trim() === "") {
+              return {error: true, msg: `Empty &lt;&lt; &gt;&gt; block. This makes no sense 
+              to me. I was expecting some expression inside the &lt;&lt; &gt;&gt; This happened
+              in XXX`}
+            }
+            eval (`window["${str}"] = ( ` + part.text + " )" )
+          } catch(err) {
+            const msg = `<< >> block: JavaScript threw an error. Is 
+              this a valid expression? This happened in XXX<br>${err}`
+            return {error: true, msg: msg}
+          }
+          const result = window[str]
+          if (result || result === 0) {
+            out += result
+          }
+        } else {
+          out += part.text
+        }
+      }
+      return out
+    }
+
     convertInlineJs(pars) {
       function convertItem(paragraph) {
         if (errorHappened) return
         let text = paragraph.text
-        const parts = utils.splitIntoPartsByStartAndEndTags(text, "<<", ">>")
-        if (parts.error) {
+        let result = that.evalText(text)
+        if (result.error) {
           errorHappened = true
-          const msg = {
-            "nested": `You cannot nest inline << >> blocks. I found a << or a >> inside
-            another << >> block.`,
-            "unclosed": `Unclosed << block. An inline block starting with << must be 
-            closed with >>. They also must be in the same text block. (No empty lines in between.)`,
-            "closed": `I found >>, which tells me to close an inline block, but
-            I never found the opening << sequence. Note that the opening << and the closing
-            >> must be in the same text block (no empty lines in between).`,            
-          }[parts.code]
-          const msg2 = `The error occurred in the text block that ENDS with line ${paragraph.lineNr}.`
-          that.rtError(paragraph.lineNr, msg + " " + msg2, false)
+          const msg = result.msg.replace("XXX", `the text block that ENDED with line ` +
+            paragraph.lineNr)
+          that.rtError(paragraph.lineNr, msg, false)
           return
         }
-
-        let out = ""
-        for (let part of parts) {
-          if (part.inside) {
-            const str = `____asj22u883223232jm_ajuHH23uh23hhhH__**~§@€xX` //prevent collision
-            window[str] = false
-            try {
-              eval (`window["${str}"] = ( ` + part.text + " )" )
-            } catch(err) {
-              errorHappened = true
-              that.rtError(paragraph.lineNr, `<< >> block: JavaScript threw an error. Is 
-                this a valid expression? This happened in the text block that ENDS with line
-                ${paragraph.lineNr}.
-                <br>${err}`, false)
-              return
-            }
-            const result = window[str]
-            if (result || result === 0) {
-              out += result
-            }
-          } else {
-            out += part.text
-          }
-        }
         return {
-          text: out,
+          text: result,
         }
       }
       const that = this
@@ -250,16 +271,9 @@ jinx = (function() {
 
     getContents() {
       //public
-
-      let pars = this.internalGetParagraphs(this.paragraphBuffer)
-      pars = this.convertInlineJs(pars)
-      if (!pars) return {
-        error: true, //error occurred. rtError has already been issued.
-      }
-
       return {
         choices: this.choices,
-        paragraphs: pars,
+        paragraphs: this.paragraphs,
       }
     }
 
@@ -364,12 +378,9 @@ jinx = (function() {
       })
     }
 
-
-
     capitalize(n) {
       return n.substr(0, 1).toUpperCase() + n.substr(1)
     }
-
 
     executeLine(index) {
 
@@ -447,15 +458,10 @@ jinx = (function() {
         return
       }
 
-      if (result === "gameEnd") {
-        //console.log("%c GAME ENDED", "background: blue; color: white")
-        this.onEvent("finishedCollecting")
-        return
-      }
-
-      if (result === "stopRunning") {
-        //console.log("%c STOPPED RUNNING", "background: blue; color: white")
-        this.onEvent("finishedCollecting")
+      if (result === "gameEnd" || result === "stopRunning") {
+        this.prepareOutput()
+        if (result === "gameEnd") this.onEvent("gameEnd")
+        if (result === "stopRunning") this.onEvent("finishedCollecting")  
         return
       }
 
@@ -469,11 +475,59 @@ jinx = (function() {
       } else {
         this.executeLine(this.pointer)
       }
+    }
+
+
+    prepareOutput() {
+      /* This is called when a turn has passed (either
+        "gameEnd" or "finishedCollecting" will be fired after this.)
+        It prepares the paragraphs and choices, so the runner
+        can fetch them via .getContents after that.
+        It's important that this is called only once per turn,
+        since it's NOT side-effect-free. (It evals << >> blocks inside strings
+        to perform text substitutions. Ideally, the user
+        should not use side-effect inducing stuff inside << >> blocks,
+        if possible, but it's still allowed.)
+        */
       
+      //fix up paragraphs:
+      let pars = this.internalGetParagraphs(this.paragraphBuffer)
+      pars = this.convertInlineJs(pars)
+      if (!pars) return //error occurred. rtError has already been issued.
+      this.paragraphs = pars
+
+      //fix up choices:
+      let choices = this.getFixedUpChoices(this.choices)
+      if (!choices) return //error occurred. rtError has already been issued.
+      this.choices = choices
 
     }
 
     //execJsstart(line) {}
+
+
+    getFixedUpChoices(choices) {
+      function convertItem(choice) {
+        if (errorHappened) return
+        let text = choice.text
+        let result = that.evalText(text)
+        if (result.error) {
+          errorHappened = true
+          const msg = result.msg.replace("XXX", `the choice on line ` +
+            choice.lineNr)
+          that.rtError(choice.lineNr, msg, false)
+          return
+        }
+        choice.text = result
+        return choice
+      }
+      console.log("CHOICES", choices)
+      const that = this
+      let errorHappened = false
+      choices = choices.map( function (p) {return convertItem(p)} )
+      if (errorHappened) return false
+      return choices
+    }
 
 
 
@@ -536,7 +590,7 @@ jinx = (function() {
           const currentParagraph = paragraphs[paragraphs.length - 1]
           if (currentParagraph.text.length) {
             if (currentParagraph.text[currentParagraph.text.length - 1] !== " ") {
-              throw new Error `Glue error. Paragraph should end with space.`
+              throw new Error (`Glue error. Paragraph should end with space.`)
             }
             currentParagraph.text = currentParagraph.text
               .substr(0, currentParagraph.text.length - 1) //VS code
@@ -552,7 +606,6 @@ jinx = (function() {
 
       return paragraphs
     }
-
 
     execEmpty(line) {
       //empty line (paragraph delimiter)
@@ -658,6 +711,7 @@ jinx = (function() {
         subType: line.subType,
         index: this.choices.length,
         internalLineNr: line.internalLineNr,
+        lineNr: line.lineNr,
       }
 
       let conditionOk = true
@@ -693,7 +747,6 @@ jinx = (function() {
       //if (!debug.log) return
       console.log("%c " + msg, "background: pink; color: black;")
     }
-
 
     execSinglelinejs(line) {
       //console.log("exec single line js", line)

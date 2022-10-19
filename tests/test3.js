@@ -7,6 +7,9 @@ window.testSuite[3] = {
     name: "max recursion breakage",
     notes: "",
     code: `
+
+    #window.v = {}
+
     + okay0
 
     + okay1
