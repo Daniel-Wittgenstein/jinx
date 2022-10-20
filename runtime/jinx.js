@@ -3,15 +3,13 @@
 
 todo:
 + once-only choices
-+ check if block if conditions wrap choices, if so, return error (is not allowed)
 + api to directly go to paragraph or label and start running from there
 and a js function to go to paragraph or label
 that can be called WHILE JINX IS RUNNING! -> provided by jinx for any runner to use
 + runner api stuff
 
 done:
-+ <<>> text replacements should work for choices, too
-+ expressions between {} are evalled as JS and value is printed.
++ <<>> text replacements work for choices, too
 + if conditions for choices (on same line)
 
 notes:
@@ -22,6 +20,7 @@ usage:
   let str = `String containining your story in Jinx code.`
   let story = jinx.createNewStory(str, (err) => {console.log("error occurred:", err)}, storyEventFunc)
   story.restart b ()
+
 */
 
 jinx = (function() {

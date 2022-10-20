@@ -9,6 +9,7 @@
   //provide global hooks for the story author:
 
   const jin = {
+
     createVariableStore: (key) => {
       //creates a new global variable store for the story author
       if (window[key]) {
@@ -31,7 +32,33 @@
       return variableStores
     },
 
+    createEffect: () => {
+
+    },
+
+    goto: () => {
+
+    },
+
+    say: () => {
+
+    },
+
+    output: () => {
+
+    },
+
+    choice: () => {
+
+    },
     
+    rnd: () => {
+
+    },
+
+    pick: () => {
+
+    },
 
   } //jin end
 
@@ -63,7 +90,6 @@
 
     const rmode = window.$__RUNTIME_MODE
     console.log(`Running mode: ${rmode}`)
-
 
     document.addEventListener( "click", onClick )
 

@@ -87,7 +87,6 @@
       //is set for the SECOND(!) time. No idea how that actually makes sense, it does
       //not make sense to me. Source: own experimentation only.
 
-
     codeMirror = CodeMirror(document.getElementById("tab-content-story"), {
       value: "",
       mode:  "jinx",
@@ -138,6 +137,7 @@
     initHelp()
 
     selectTab("story", 0)
+    selectTab("play", 1)
     
     
             //selectTab("debug", 1) //testing
