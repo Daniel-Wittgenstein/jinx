@@ -2,23 +2,21 @@
 /*
 
 todo:
-+ <<>> text replacements should work for choices, too
 + once-only choices
 + check if block if conditions wrap choices, if so, return error (is not allowed)
 + api to directly go to paragraph or label and start running from there
 and a js function to go to paragraph or label
 that can be called WHILE JINX IS RUNNING! -> provided by jinx for any runner to use
 + runner api stuff
-+ if conditions for choices: test thoroughly
 
 done:
++ <<>> text replacements should work for choices, too
 + expressions between {} are evalled as JS and value is printed.
 + if conditions for choices (on same line)
 
 notes:
 + inline choices and each turn functionality are things the runner can provide.
 + they are not done by jinx
-
 
 usage:
   let str = `String containining your story in Jinx code.`

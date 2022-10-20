@@ -128,7 +128,7 @@
     let paragraphs = contents.paragraphs
     let delay = 0
     const delayInterval = 30
-
+    if (!paragraphs) return
     //console.log(222, paragraphs)
     for (let p of paragraphs) {
       setTimeout( () => {
