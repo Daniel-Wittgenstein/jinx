@@ -101,7 +101,15 @@ jinx = (function() {
 
       //assign INTERNAL line numbers:
       let i = -1
-      lines = lines.map( n => {i++; n.internalLineNr = i; return n})
+      lines = lines.map( n => {
+        if (!n) {
+          console.log(lines, n, i)
+          throw new Error("Fatal error: line is false! This should never happen.")
+        }
+        i++
+        n.internalLineNr = i
+         return n
+      })
 
       if (debug.compilationTime) {console.time("annotate lines")}
       result = annotateLines(lines)
@@ -679,7 +687,12 @@ jinx = (function() {
     }
     
     execEnd(line) {
-      //nothing at the moment
+      //nothing else at the moment
+      return "advanceByOne"
+    }
+
+    execComment(line) {
+      //nothing else
       return "advanceByOne"
     }
 
@@ -981,7 +994,7 @@ jinx = (function() {
         type = "goto"
       } else if ( line.startsWith("//") ) {
         //comment
-        return false
+        return { type: "comment" }
       } else if (line.startsWith(".")) {
         let res = getDotCommandType(line)
         if (!res) {
@@ -996,12 +1009,15 @@ jinx = (function() {
       } else if (type !== "empty") {
         type = "text"
       }
-      return {
+
+      const o = {
         type: type,
         subType: subType,
         text: line,
         lineNr: i + 1, //(starting from 1 not 0)
       }
+
+      return o
     })
       //lines = lines.filter( n => n ) NO! JUST NO!
     /*lines = lines.map ( n => {

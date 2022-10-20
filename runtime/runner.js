@@ -6,15 +6,18 @@
 
   window.onload = startP
 
-  //provide global hooks for the story author:
+  const registeredEffects = {}
 
-  const jin = {
+  const jin = {//provide global hooks for the story author:
+    
+    //jin methods can throw JS errors, because code called
+    //from the story script is wrapped inside try/catch anyway
+    //and displays error information if an error occurs.
+    //use throw new Error(`), NOT throw ``
 
     createVariableStore: (key) => {
       //creates a new global variable store for the story author
       if (window[key]) {
-        //note: when calling this from the story, the error
-        //will be shown to the user (with correct line number)
         throw new Error(`A variable store called "${key}" exists already.
         (This error happened while calling the function "createVariableStore".)`)
       }
@@ -32,8 +35,36 @@
       return variableStores
     },
 
-    createEffect: () => {
+    createEffect: (type, func, order = 0) => {
+      const allowed = ["after", "before", "onVariableChange", "set", "get"]
+      if (!type) {
+        throw new Error(`createEffect: no parameters pased to function?`)
+      }
+      if (!allowed.includes(type)) {
+        throw new Error(`createEffect: "${type}" is not a valid type for createEffect.`)
+      }
+      if (!utils.isFunc(func)) {
+        throw new Error(`createEffect: second parameter is not a valid function.`)
+      }
+      if (!utils.isInteger(order)) {
+        throw new Error(`createEffect: third parameter is not a valid integer number.`)
+      }
+      
+      if (!registeredEffects[type]) {
+        registeredEffects[type] = []
+      }
 
+      registeredEffects[type].push({
+        type: type,
+        func: func,
+        order: order,
+      })
+
+      registeredEffects[type] = registeredEffects[type].sort(
+        (a, b) => {
+          return a.order - b.order
+        }
+      )
     },
 
     goto: () => {
@@ -124,6 +155,10 @@
   }
 
   function onError(err) {
+    outputError(err)
+  }
+
+  function outputError(err) {
     console.log("error:", err)
     const out = `
       <div style="background: #FFF; color: #B00; padding: 10px;

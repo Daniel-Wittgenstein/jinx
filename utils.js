@@ -4,13 +4,18 @@ const utils = {
   isObj(v) {
     //is it actual object, the way I mean it; not an
     //array and not null and not a function
-    return typeof v === 'object' && v !== null && !is_array(v)
+    return typeof v === 'object' && v !== null && !isArray(v)
   },
   
   isArray(v) {
     return Array.isArray(v)
   },
-  
+
+  isInteger(v) {
+    //true integer, not a string containing an integer
+    //not sure if this is 100% correct, but seems to work
+    return Math.round(Number(v)) === v
+  },
 
   isString(n) {
     return typeof n === 'string' || n instanceof String
