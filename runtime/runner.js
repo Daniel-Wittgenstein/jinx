@@ -26,13 +26,48 @@
         name: key,
         content: {},
       }
-      window[key] = store.content
-      variableStores[key] = store
+      const handler = {
+        get(target, prop, receiver) {
+          //todo to do
+          console.log("get", target, prop, receiver)
+        },
+
+        set(target, prop, value, receiver) {
+
+          //get old value:
+          const oldValue = store.content[prop]
+
+          //onVariableChange effects:
+          if (registeredEffects.onVariableChange) {
+            for (let effect of registeredEffects.onVariableChange) {
+              effect.func(prop, value, key, oldValue)
+            }
+          }
+
+          let currentValue = value
+
+          //set effects:
+          if (registeredEffects.set) {
+            for (let effect of registeredEffects.set) {
+              let result = effect.func(prop, currentValue, key, value, oldValue)
+              currentValue = result
+            }
+          }
+
+          //set value:
+          store.content[prop] = currentValue
+
+          return true
+        },
+      }
+      const proxy = new Proxy(store, handler)
+      window[key] = proxy
+      variableStores[key] = proxy
     },
 
     getVariableStores: () => {
       //author should not normally need this, but it's exposed
-      //for completeness
+      //for completeness. note that this will contain proxies.
       return variableStores
     },
 
