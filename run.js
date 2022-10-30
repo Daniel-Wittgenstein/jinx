@@ -52,19 +52,90 @@
       appVersion: appMetaData.version,
       story: codeMirror.getValue(),
       html: codeMirrorHtml.getValue(),
+      assets: getAssetsData(),
     }
   }
 
   function setStoryData(state) {
     codeMirror.setValue(state.story)
     codeMirrorHtml.setValue(state.html)
+    setAssetsData(state.assets)
   }
+
+  let assetsData = {
+    assets: {
+      "bla": {
+        name: "bla",
+      }
+    },
+  }
+
+  function getAssetsData() {
+    return assetsData
+  }
+
+  function setAssetsData(state) {
+    assetsData = state
+  }
+
+  function updateAssetsView() {
+    const el = document.getElementById("tab-content-assets-main")
+    let out = ""
+    const lst = Object.keys(assetsData.assets).sort()
+    let index = -1
+    for ( let key of lst ) {
+      index++
+      const asset = assetsData.assets[key]
+      let preview = ""
+      if (asset.type === "image") {
+        preview = `<img class = "asset-preview-image" src="${asset.data}"/>`
+      }
+      out += `<div class="asset-entry">
+        <input class="asset-namor"
+        id = "asset-name-${asset.name}" value="${asset.name}">
+        <button class="asset-deletor" data-index="${index}">delete</button>
+          <span class="asset-type-text">type: ${asset.type} / ${asset.subType}</span>
+          ${preview}
+        </div>`
+    }
+    el.innerHTML = out
+
+    let assetNamors = document.querySelectorAll('.asset-namor')
+    for (let i = 0; i < assetNamors.length; i++) {
+      assetNamors[i].addEventListener('change', function (ev) {
+        //todo rename asset
+      })
+    }
+
+    let assetDeletors = document.querySelectorAll('.asset-deletor')
+    for (let i = 0; i < assetDeletors.length; i++) {
+      assetDeletors[i].addEventListener('click', function (ev) {
+        console.log(ev, ev.target, ev.target.dataset.index)
+        const index = Number(ev.target.dataset.index)
+        const lst = Object.keys(assetsData.assets).sort()
+        let i = -1
+        for (let key of lst) {
+          i++
+          if (i === index) {
+            delete assetsData.assets[key]
+          }
+        }
+        updateAssetsView()
+      })
+    }
+
+
+  }
+
+
 
   let IS_FULLSCREEN = false
 
   function start() {
 
     //console.clear()
+
+    initAddAssetsButton()
 
     document.getElementById("play-tools-button-fullscreen")
       .addEventListener("click", (e) => {
@@ -136,16 +207,73 @@
     $("#about-button").on("click", clickAbout)
     initHelp()
 
+    updateAssetsView()
+
+
     selectTab("story", 0)
     selectTab("play", 1)
     
     
-            //selectTab("debug", 1) //testing
+            selectTab("assets", 0) //testing
 
     //showRunResults()
     //showPlayBox()
     ////translate()
 
+  }
+
+
+  function initAddAssetsButton() {
+    $("#asset-file-input").on("change", function(e) {
+      let file = e.target.files[0]
+      let parts = file.type.split("/")
+      let type = parts[0]
+      let subtype = parts[1]
+      let org_name = sanitizeAssetName( file.name.split(".")[0] )
+      let name = org_name
+      let nr = 1 //this way we start with number 2, so we have: cat, cat2 etc.
+      while (assetsData.assets[name]) {
+        nr += 1
+        name = org_name + nr
+      }
+
+      var reader = new FileReader()
+      reader.onload = function(){
+        let data_url = reader.result
+        addAsset(type, subtype, data_url, name)
+        updateAssetsView()
+      }
+      reader.readAsDataURL(file)
+    })
+
+    $("#add-asset-button").on("click", function() {
+      $('#asset-file-input').trigger("click")
+    })
+  }
+
+  function addAsset(type, subType, dataUrl, name) {
+    if (assetsData.assets[name]) {
+      alert(`Duplicate asset name`) //should not happen, since we automatically
+        //add numbers for disambiguation, but just to be sure
+      return
+    }
+    assetsData.assets[name] = {
+      data: dataUrl,
+      name,
+      type,
+      subType,
+    }
+  }
+
+  function sanitizeAssetName(v) {
+    return v
+      .replaceAll('"', "")
+      .replaceAll("'", "")
+      .replaceAll('`', "")
+      .replaceAll("#", "")
+      .replaceAll("/", "")
+      .replaceAll(":", "")
+      .trim()
   }
 
   function clickAbout() {
@@ -366,14 +494,10 @@
     selectedTab[area] = name 
   }
 
-
-
   function initHelp() {
     const text = window.HELP_CONTENTS
     $("#tab-content-help").html(text)
   }
-
-
 
   function showRunResults() {
     $("#play-iframe").hide()

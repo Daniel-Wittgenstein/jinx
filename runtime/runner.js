@@ -29,7 +29,6 @@
       const handler = {
         get(target, prop, receiver) {
           //todo to do
-          console.log("get", target, prop, receiver)
         },
 
         set(target, prop, value, receiver) {

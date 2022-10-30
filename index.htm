@@ -32,6 +32,7 @@
       <div class="top bar">
         <div class="tab tab-left tab-chosen" id="tab-story" onclick="selectTab('story', 0)">Story</div>
         <div class="tab tab-left" id="tab-html" onclick="selectTab('html', 0)">HTML</div>
+        <div class="tab tab-left" id="tab-assets" onclick="selectTab('assets', 0)">Assets</div>
       </div>
       <div class="tab-bar" id="tab-bar">
         <div class="tab tab-right tab-chosen" id="tab-play" onclick="selectTab('play', 1)">Play</div>
@@ -43,6 +44,13 @@
       <div class="code mids" id="code">
         <div class="tab-content-left" id="tab-content-story"></div>
         <div class="tab-content-left" id="tab-content-html"></div>
+        <div class="tab-content-left" id="tab-content-assets">
+          <div id="tab-content-assets-button-holder">
+            <button id="add-asset-button" class="bar-button">add asset</button>
+            <input type="file" id="asset-file-input" style="display: none">
+          </div>
+          <div id="tab-content-assets-main"></div>
+        </div>
       </div>
 
       <div class="play mids">

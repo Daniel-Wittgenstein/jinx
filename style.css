@@ -10,6 +10,8 @@
 
   --play-tools-bar-height: 38px;
 
+  --assets-tools-bar-height: 38px;
+
   --tab-bg: #555;
   --tab-fg: #ccc;
   --tab-hover-bg: #333;
@@ -198,3 +200,58 @@ pre {
   padding: 12px;
   overflow: auto;
 }
+
+
+#tab-content-assets {
+  background: #fff;
+  border-top: 1px solid #777;
+  border-bottom: 1px solid #999;
+  border-right: 0px;
+  border-left: 0px;
+  overflow: hidden;
+}
+
+
+#tab-content-assets-button-holder {
+  background: #CCC;
+  padding: 6px;
+}
+
+#tab-content-assets-main {
+  padding: 12px;
+}
+
+.asset-entry {
+  padding-bottom: 12px;
+  border: 0px solid #CCC;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.asset-type-text {
+  font-size: 10px;
+}
+
+.asset-preview-image {
+  width: 40px;
+  height: 40px;
+}
+
+.asset-namor {
+  max-width:200px;
+  margin-right: 4px;
+}
+
+.asset-deletor {
+  margin-right: 4px;
+}
+
+.asset-type-text {
+  margin-right: 4px;
+}
+
+/* 
+calc(100vh - var(--assets-tools-bar-height)
+    - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
+*/
