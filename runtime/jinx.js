@@ -30,7 +30,7 @@ jinx = (function() {
   }
 
   const debug = {
-    log: false,
+    log: 1,
     logFlow: 0,
     compilationTime: 0,
     turtle: 0,

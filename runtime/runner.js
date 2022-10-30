@@ -13,7 +13,8 @@
     //jin methods can throw JS errors, because code called
     //from the story script is wrapped inside try/catch anyway
     //and displays error information if an error occurs.
-    //use throw new Error(`), NOT throw ``
+    //use throw new Error(`), NOT throw `` because only that
+    //displays erros correctly.
 
     createVariableStore: (key) => {
       //creates a new global variable store for the story author
@@ -38,7 +39,7 @@
     createEffect: (type, func, order = 0) => {
       const allowed = ["after", "before", "onVariableChange", "set", "get"]
       if (!type) {
-        throw new Error(`createEffect: no parameters pased to function?`)
+        throw new Error(`createEffect: no parameters passed to function?`)
       }
       if (!allowed.includes(type)) {
         throw new Error(`createEffect: "${type}" is not a valid type for createEffect.`)

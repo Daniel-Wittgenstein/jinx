@@ -1,0 +1,94 @@
+
+<h1>DEMO STORY</h>
+
+<h2>Haunted House</h2>
+
+<h3>Daniel Wittgenstein</h3>
+
+This is just a short demo story.
+It uses current features of Jinx (October 2022).
+In the meantime, Jinx is not finished and
+more features will be added to it in the future,
+so this is not an extensive showcase of
+all of Jinx's features by any means.
+
+You enter the Haunted House.
+
++ okay
+-
+You find yourself inside a living room. Everything is dusty and
+old, but that's what you would expect from a Haunted
+House, isn't it?
+
++ Keep exploring
+
++ Look at the grandfather's clock
+	An arrow shoots out of the clock and misses you by mere
+  inches. Jeez! You already thought this is one of those
+  stories where you die all the time.
+  Glad you survived at least one turn.
+  
+ 	You decide to leave this living room of death and keep exploring
+  the house.
+ 
+-
+
+You enter the next room. It's a kitchen.
+
+.goto kitchen
+
+=== kitchen
+
++ (if !v.opened_fridge) Open the fridge
+
+	#v.opened_fridge = true
+	You open the fridge. There's only an apple inside it.
+  
+  ++ take the apple
+  	You take the apple. Who knows, it might come in handy later.
+    #v.apple = true
+  
+  ++ leave it alone
+	
+  --
+  .goto kitchen
+
++ (if !v.pan) Take a pan
+	You grab a pan. Not the best weapon, but it's a start.
+	# v.pan = true
+	.goto kitchen
+
++ Keep exploring
+
+You keep exploring ...
+.goto staircase
+
+=== staircase
+
+The next room is a staircase. The stairs only lead down.
+
++ Go down
+
+You walk down the stairs and find yourself in a dimly-lit wine cellar.
+
+There's a dog here, a husky with a red scarf.
+
+.if v.apple
+	"Do you have an apple?", she says, "Yes, you have one!
+  Great! Now we can make cidre."
+  
+  "Weird", you say, "I didn't know that huskies enjoy cidre."
+  
+  "And that's the only thíng you find weird about this setting?",
+  the husky asks.
+  
+.else
+	"Why didn't you take the apple?", she says in a sad
+  voice, "Now we cannot make cidre."
+.end
+
+
+<h1>THE END</h1>
+
+
+.endgame
