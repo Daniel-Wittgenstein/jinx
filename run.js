@@ -107,10 +107,13 @@
     let assetNamors = document.querySelectorAll('.asset-namor')
     for (let i = 0; i < assetNamors.length; i++) {
       assetNamors[i].addEventListener('change', function (ev) {
+        let nuName = ev.target.value
+        nuName = nuName.trim()
+        assetNamors[i].value = nuName
         const index = i
         const lst = Object.keys(assetsData.assets).sort() //sort is important
         let j = -1
-        const nuName = ev.target.value
+
 
         if ( !isLegalAssetName(nuName) ) {
           alert(`Asset name contains illegal character.`)
