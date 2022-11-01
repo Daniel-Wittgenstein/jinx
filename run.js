@@ -31,14 +31,16 @@
 
   function loadSession(savData) {
     let v
+
     try {
       v = JSON.parse(savData)
     } catch(e) {
       alert("Load session: corrupted localStorage? Could not load last session. Sorry.")
       return
     }
-    codeMirror.setValue(v.story)
-    codeMirrorHtml.setValue(v.html)
+    //codeMirror.setValue(v.story)
+    //codeMirrorHtml.setValue(v.html)
+    setStoryData(v) 
   }
 
   function saveSession() {
@@ -83,16 +85,18 @@
     let out = ""
     const lst = Object.keys(assetsData.assets).sort()
     let index = -1
+    const indexToAssetList = []
     for ( let key of lst ) {
       index++
       const asset = assetsData.assets[key]
+      indexToAssetList[index] = assetsData.assets[key]
       let preview = ""
       if (asset.type === "image") {
         preview = `<img class = "asset-preview-image" src="${asset.data}"/>`
       }
       out += `<div class="asset-entry">
         <input class="asset-namor"
-        id = "asset-name-${asset.name}" value="${asset.name}">
+        value="${asset.name}">
         <button class="asset-deletor" data-index="${index}">delete</button>
           <span class="asset-type-text">type: ${asset.type} / ${asset.subType}</span>
           ${preview}
@@ -103,7 +107,34 @@
     let assetNamors = document.querySelectorAll('.asset-namor')
     for (let i = 0; i < assetNamors.length; i++) {
       assetNamors[i].addEventListener('change', function (ev) {
-        //todo rename asset
+        const index = i
+        const lst = Object.keys(assetsData.assets).sort() //sort is important
+        let j = -1
+        const nuName = ev.target.value
+
+        if ( !isLegalAssetName(nuName) ) {
+          alert(`Asset name contains illegal character.`)
+          return
+        }
+
+        if (assetsData.assets[nuName]) {
+          assetNamors[i].value = indexToAssetList[i].name
+          alert(`Could not rename this asset.` + 
+            `Another asset named "${nuName}" exists already.`)
+          return
+        }
+        const assetObj = indexToAssetList[i]
+        for (let key of lst) {
+          j++
+          if (j === index) {
+            //console.log( assetsData.assets[key] )
+            delete assetsData.assets[key]
+          }
+        }
+        assetObj.name = nuName
+        assetsData.assets[nuName] = assetObj
+        saveSession()
+        updateAssetsView()
       })
     }
 
@@ -112,14 +143,15 @@
       assetDeletors[i].addEventListener('click', function (ev) {
         console.log(ev, ev.target, ev.target.dataset.index)
         const index = Number(ev.target.dataset.index)
-        const lst = Object.keys(assetsData.assets).sort()
-        let i = -1
+        const lst = Object.keys(assetsData.assets).sort() //sort is important
+        let j = -1
         for (let key of lst) {
-          i++
-          if (i === index) {
+          j++
+          if (j === index) {
             delete assetsData.assets[key]
           }
         }
+        saveSession()
         updateAssetsView()
       })
     }
@@ -127,6 +159,13 @@
 
   }
 
+
+  function isLegalAssetName(name) {
+    return !(
+      name.includes("'") ||
+      name.includes('"')
+    )
+  }
 
 
   let IS_FULLSCREEN = false
@@ -241,6 +280,7 @@
       reader.onload = function(){
         let data_url = reader.result
         addAsset(type, subtype, data_url, name)
+        saveSession()
         updateAssetsView()
       }
       reader.readAsDataURL(file)
