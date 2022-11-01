@@ -27,6 +27,7 @@
         content: {},
       }
       const handler = {
+
         get(target, prop, receiver) {
           //todo to do
         },
@@ -69,6 +70,14 @@
       //for completeness. note that this will contain proxies.
       return variableStores
     },
+
+
+    asset(name) { //simple getAsset data function for story creator
+      let x = storyData.assetsData.assets[name]
+      if (x) return x.data
+      return false
+    },
+
 
     createEffect: (type, func, order = 0) => {
       const allowed = ["after", "before", "onVariableChange", "set", "get"]
@@ -210,11 +219,23 @@
   }
 
 
+
   function onStoryEvent(type) {
     console.log("JINX EVENT TRIGGERED:", type)
     if (type === "finishedCollecting" || type === "gameEnd") {
       renderStuff()
     }
+  }
+  
+  function preProcessParagraphText(text) {
+    text = text.replace(/\$asset\(.*?\)/g, (n) => {
+      n = n.replace("$asset(", "").replace(")", "").trim()
+      let el = storyData.assetsData.assets[n]
+      //$asset(asset "${n}" does not exist)
+      if (!el) return ""
+      return el.data
+    })
+    return text
   }
 
   function renderStuff() {
@@ -229,8 +250,9 @@
     for (let p of paragraphs) {
       setTimeout( () => {
         let el = document.createElement("div") //divs are more powerful than p
-        el.innerHTML = p.text
         el.classList.add("story-paragraph")
+        const text = preProcessParagraphText(p.text)
+        el.innerHTML = text
         mainOutputElement.appendChild(el)
       }, delay)
       delay += delayInterval
