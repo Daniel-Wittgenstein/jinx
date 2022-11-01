@@ -100,6 +100,7 @@
         <button class="asset-deletor" data-index="${index}">delete</button>
           <span class="asset-type-text">type: ${asset.type} / ${asset.subType}</span>
           ${preview}
+          <span class="asset-size-text">${asset.size}</span>
         </div>`
     }
     el.innerHTML = out
@@ -113,7 +114,6 @@
         const index = i
         const lst = Object.keys(assetsData.assets).sort() //sort is important
         let j = -1
-
 
         if ( !isLegalAssetName(nuName) ) {
           alert(`Asset name contains illegal character.`)
@@ -287,11 +287,10 @@
         nr += 1
         name = org_name + nr
       }
-
       var reader = new FileReader()
-      reader.onload = function(){
-        let data_url = reader.result
-        addAsset(type, subtype, data_url, name)
+      reader.onload = function() {
+        let dataUrl = reader.result
+        addAsset(type, subtype, dataUrl, name)
         saveSession()
         updateAssetsView()
       }
@@ -303,17 +302,45 @@
     })
   }
 
+
+  function roundToDigits(n, digits = 1) {
+    const factor = Math.pow(10, digits)
+    return Math.round(n * factor) / factor
+  }
+
+
+	function getApproximateByteSize(json) {
+    function lengthInUtf8Bytes(s) {
+      const len = encodeURIComponent(s).match(/%[89ABab]/g)
+      return s.length + (len ? len.length : 0)
+    }
+		const size = lengthInUtf8Bytes(json)
+		let str = roundToDigits(size / 1024 / 1024, 1) + " MB"
+		if (size < 1024 * 1024) str = Math.round(size / 1024) +" KB"
+		if (size < 1024) str = "< 1 KB"
+    return str
+  }
+
+
+
+
+  
   function addAsset(type, subType, dataUrl, name) {
     if (assetsData.assets[name]) {
       alert(`Duplicate asset name`) //should not happen, since we automatically
         //add numbers for disambiguation, but just to be sure
       return
     }
+
+    const size = getApproximateByteSize(dataUrl) //bigger than
+      //actual asset because of base64 inflation, probably
+
     assetsData.assets[name] = {
       data: dataUrl,
       name,
       type,
       subType,
+      size,
     }
   }
 
@@ -518,7 +545,11 @@
       throw new Error(`getEntireStoryHtmlPage: no mode parameter was passed.`)
     }
     let v = codeMirror.getValue()
-    v = { content: v }
+    //this is the storyData injected into the html page:
+    v = {
+      content: v,
+      assetsData: assetsData,
+    }
     v = `;window.$__RUNTIME_MODE = "${mode}";storyData = ` + JSON.stringify(v)
     const htmlContent = codeMirrorHtml.getValue()
     let html = createHtmlTemplate(htmlContent, v)
