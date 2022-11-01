@@ -88,4 +88,10 @@ div {
   border-radius: var(--choice-radius) var(--choice-radius) var(--choice-radius) var(--choice-radius);
 }
 
+.story-paragraph {
+  /* This is a story paragraph.
+  Only they are actually displayed as DIVs, not Ps
+  */
+  margin-bottom: 14px;
+}
 

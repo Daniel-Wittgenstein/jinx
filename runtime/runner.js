@@ -228,8 +228,9 @@
     //console.log(222, paragraphs)
     for (let p of paragraphs) {
       setTimeout( () => {
-        let el = document.createElement("p")
+        let el = document.createElement("div") //divs are more powerful than p
         el.innerHTML = p.text
+        el.classList.add("story-paragraph")
         mainOutputElement.appendChild(el)
       }, delay)
       delay += delayInterval
