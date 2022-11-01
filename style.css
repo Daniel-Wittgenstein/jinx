@@ -208,7 +208,9 @@ pre {
   border-bottom: 1px solid #999;
   border-right: 0px;
   border-left: 0px;
-  overflow: hidden;
+  overflow: auto;
+  height: calc(100vh - var(--assets-tools-bar-height)
+    - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
 }
 
 
@@ -219,6 +221,7 @@ pre {
 
 #tab-content-assets-main {
   padding: 12px;
+
 }
 
 .asset-entry {
@@ -279,7 +282,3 @@ input {
   border: 1px solid #888;
 }
 
-/* 
-calc(100vh - var(--assets-tools-bar-height)
-    - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
-*/

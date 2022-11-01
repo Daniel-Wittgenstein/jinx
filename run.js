@@ -321,9 +321,6 @@
     return str
   }
 
-
-
-
   
   function addAsset(type, subType, dataUrl, name) {
     if (assetsData.assets[name]) {
