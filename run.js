@@ -122,6 +122,15 @@
 
         if (assetsData.assets[nuName]) {
           assetNamors[i].value = indexToAssetList[i].name
+          if (assetsData.assets[nuName] === indexToAssetList[i]) {
+            //name was not changed at all, but change event
+            //was still triggered (this can happen because
+            //the user can actually change the text in the input,
+            //but the trim preprocessing strips spaces, so we end
+            //up with the same string):
+            //do absolutely nothing, except returning
+            return
+          }
           alert(`Could not rename this asset.` + 
             `Another asset named "${nuName}" exists already.`)
           return
