@@ -526,7 +526,6 @@ jinx = (function() {
         choice.text = result
         return choice
       }
-      console.log("CHOICES", choices)
       const that = this
       let errorHappened = false
       choices = choices.map( function (p) {return convertItem(p)} )

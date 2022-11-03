@@ -80,6 +80,8 @@
 
 
     createEffect: (type, func, order = 0) => {
+      // an effect for story start would be useful, too
+      // and maybe even output filters could be done as effects, why not
       const allowed = ["after", "before", "onVariableChange", "set", "get"]
       if (!type) {
         throw new Error(`createEffect: no parameters passed to function?`)
