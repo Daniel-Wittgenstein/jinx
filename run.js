@@ -137,6 +137,13 @@
       return nu.substr(0,1).toUpperCase() + nu.substr(1).toLowerCase()
     }
     let out = ""
+
+    if (plugin.links) {
+      for (let link of plugin.links) {
+        out += `<p><a href="${link.target}">${link.text}</a></p>`
+      }
+    }
+
     const order = {
       name: 1,
       author: 2,
@@ -154,17 +161,18 @@
       return orderA - orderB
     })
     for ( let key of os ) {
+      if (key === "logo") continue
       const value = plugin[key]
       if ( utils.isString(value) ) {
-        out += `<p><b>${proc(key)}:</b> ${value}</p>`
+        if (key === "documentation") {
+          out += `<div class="plugin-documentation-box">${value}</div>`
+        } else {
+          out += `<p><b>${proc(key)}:</b> ${value}</p>`
+        }
       }
     }
-    if (plugin.links) {
-      for (let link of plugin.links) {
-        out += `<p><a href="${link.target}">${link.text}</a></p>`
-      }
-    }
-    return out
+
+    return `<div class="plugin-long-view">${out}</div>`
   }
 
   window.clickPluginCheckbox = (i) => {

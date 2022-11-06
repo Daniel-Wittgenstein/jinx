@@ -228,6 +228,19 @@ pre {
   padding: 12px;
   overflow: auto;
 }
+.plugin-long-view {
+  font-size: 12px;
+  color: #333;
+}
+
+.plugin-documentation-box {
+  font-size: 14px;
+  color: #000;
+  border-left: 2px solid #aaa;
+  padding-left: 12px;
+  margin-top: 24px;
+  margin-bottom: 24px;  
+}
 
 
 #tab-content-assets-button-holder {
