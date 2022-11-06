@@ -16,9 +16,13 @@ function createHtmlTemplate(html, storyData, plugins, pluginsEnabled) {
           pJs += `\n; /* ${plugin.name} by ${plugin.author}` + 
             `\n${plugin.licenseText} */ ;\n`
         }
-
-        
-        pJs += `;` + plugin.implementation.js + ";"
+        let jsList = plugin.implementation.js
+        if ( utils.isString(jsList) ) {
+          jsList = [jsList]
+        }
+        for (let item of jsList) {
+          pJs += `;` + item + ";"
+        }
       }
 
 
