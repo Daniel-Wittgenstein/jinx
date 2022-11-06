@@ -133,33 +133,7 @@
 
     },
     
-    random: (min, max) => {
-      if (!randomNumberGenerator) {
-        throw new Error (`You need to enable the SeedRandom plugin to use this feature.`)
-        return
-      }
-      min = Math.ceil(min)
-      max = Math.floor(max)
-      return Math.floor( randomNumberGenerator() * (max - min + 1) ) + min
-    },
 
-    pick: () => {
-
-    },
-
-    seed: (s) => {
-      if (!Math.seedrandom) {
-        throw new Error (`You need to enable the SeedRandom plugin to use this feature.`)
-        return
-      }
-      if (!s && s != 0 && s !== "") {
-        randomNumberGenerator = new Math.seedrandom()
-        randomSeed = false
-      } else {
-        randomNumberGenerator = new Math.seedrandom(s)
-        randomSeed = s
-      }
-    },
 
   } //jin end
 

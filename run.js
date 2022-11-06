@@ -143,13 +143,13 @@
     const order = {
       name: 1,
       author: 2,
-      copyrightInfo: 3,
-      license: 4,
-      version: 5,
-      shortInfo: 6,
-      disclaimer: 7,
-      bundledBy: 8,
-      documentation: 9,
+      documentation: 3,
+      copyrightInfo: 4,
+      license: 5,
+      version: 6,
+      shortInfo: 7,
+      disclaimer: 8,
+      bundledBy: 9,
     }
     const os = Object.keys(plugin).sort( (a, b) => {
       let orderA = order[a] || 2000
