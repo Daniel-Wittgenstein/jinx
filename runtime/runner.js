@@ -32,7 +32,8 @@
       const handler = {
 
         get(target, prop, receiver) {
-          //todo to do
+          //todo to do: getter effects
+          return store.content[prop]
         },
 
         set(target, prop, value, receiver) {
