@@ -3,7 +3,7 @@ window.runTimeData = {}
 
 function createHtmlTemplate(html, storyData, plugins, pluginsEnabled) {
   const data = window.runTimeData
-
+ 
   let pJs = ""
   let pCss = ""
   let i = -1
@@ -12,9 +12,17 @@ function createHtmlTemplate(html, storyData, plugins, pluginsEnabled) {
     if (!pluginsEnabled[i]) continue
     if (plugin.implementation) {
       if (plugin.implementation.js) {
+        if (plugin.licenseTextMustBeIncludedInFinalGame) {
+          pJs += `\n; /* ${plugin.name} by ${plugin.author}` + 
+            `\n${plugin.licenseText} */ ;\n`
+        }
         pJs += `;` + plugin.implementation.js + ";"
       }
       if (plugin.implementation.css) {
+        if (plugin.licenseTextMustBeIncludedInFinalGame) {
+          pCss += `\n/* ${plugin.name} by ${plugin.author}\n` +
+            `${plugin.licenseText} */\n`
+        }
         pCss += plugin.implementation.css + "\n\n"
       }
     }
