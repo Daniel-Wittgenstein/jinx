@@ -6,8 +6,12 @@
     appIdentifierName: "jinx", //written into save file. note that changing this
       //will make save files from previous versions automatically incompatible.
       //(it's better never to change this)
-    version: "0.0.1", //app version. compatibility is decided by the function
+    version: "0.1", //app version. compatibility is decided by the function
       //isVersionNumberCompatible
+      //compatibility for plugins is decided by the function
+      //isPluginCompatible.
+      //version should ALWAYS be in the format: a number, a dot, another number
+      //first number is main version, second number is sub-version
   }
 
   const settings = {
@@ -17,6 +21,7 @@
       //this amount of time has to pass until the story is re-translated.
   }
 
+  let pluginsEnabled = []
 
   const temp = {
     lastTranslation: 0,
@@ -48,6 +53,22 @@
     localStorage.setItem( localStorageKey, JSON.stringify(savData) )
   }
 
+  function getPluginsData() {
+    const tplugins = $_PLUGIN.getAll().filter(p => !p.builtIn)
+    return {
+      pluginsEnabled,
+      plugins: tplugins,
+    }
+  }
+
+  function setPluginsData(state) {
+    if (!state) return
+    pluginsEnabled = state.pluginsEnabled
+    for (let plugin of state.plugins) {
+      $_PLUGIN.add(plugin)
+    }
+  }
+
   function getStoryData() {
     return {
       appName: appMetaData.appIdentifierName,
@@ -55,6 +76,8 @@
       story: codeMirror.getValue(),
       html: codeMirrorHtml.getValue(),
       assets: getAssetsData(),
+      plugins: getPluginsData(),
+      appStorySaveState: true,
     }
   }
 
@@ -62,6 +85,9 @@
     codeMirror.setValue(state.story)
     codeMirrorHtml.setValue(state.html)
     setAssetsData(state.assets)
+    setPluginsData(state.plugins)
+    updateAssetsView()
+    updatePluginView()
   }
 
   let assetsData = {
@@ -79,6 +105,196 @@
   function setAssetsData(state) {
     assetsData = state
   }
+
+  let lastPluginViewScrollPosition = 0
+
+  window.viewPluginInPopup = (index) => {
+    const plugin = $_PLUGIN.getAll()[index]
+    const el = document.getElementById("tab-content-plugins")
+    const out = `<button onclick="window.closePluginPopup()">back</button></p>`
+    el.innerHTML = out + getPluginLongView(plugin)
+    //scroll up
+    lastPluginViewScrollPosition = el.scrollTop
+    el.scrollTop = 0
+  }
+
+  window.closePluginPopup = () => {
+    updatePluginView()
+    //scroll up
+    const el = document.getElementById("tab-content-plugins")
+    el.scrollTop = lastPluginViewScrollPosition
+  }
+
+  function getPluginLongView(plugin) {
+    function proc(str) {
+      let nu = ""
+      for (let char of str) {
+        if (char.toUpperCase() === char) {
+          nu += " "
+        }
+        nu += char
+      }
+      return nu.substr(0,1).toUpperCase() + nu.substr(1).toLowerCase()
+    }
+    let out = ""
+    const order = {
+      name: 1,
+      author: 2,
+      copyrightInfo: 3,
+      license: 4,
+      version: 5,
+      shortInfo: 6,
+      disclaimer: 7,
+      bundledBy: 8,
+      documentation: 9,
+    }
+    const os = Object.keys(plugin).sort( (a, b) => {
+      let orderA = order[a] || 2000
+      let orderB = order[b] || 2000
+      return orderA - orderB
+    })
+    for ( let key of os ) {
+      const value = plugin[key]
+      if ( utils.isString(value) ) {
+        out += `<p><b>${proc(key)}:</b> ${value}</p>`
+      }
+    }
+    if (plugin.links) {
+      for (let link of plugin.links) {
+        out += `<p><a href="${link.target}">${link.text}</a></p>`
+      }
+    }
+    return out
+  }
+
+  window.clickPluginCheckbox = (i) => {
+    pluginsEnabled[i] = !pluginsEnabled[i]
+    saveSession()
+  }
+
+  window.deletePlugin = (i) => {
+    if (window.confirm(`Do you really want to delete this plugin? ` +
+      `(After deletion, the plugin cannot be restored without the original plugin file.)`)) {
+      $_PLUGIN.deletePlugin(i)
+      updatePluginView()
+      saveSession()
+    }
+  }
+
+  window.loadPlugin = (i) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      reader.readAsText(file, 'UTF-8')
+      reader.onload = (readerEvent) => {
+        const content = readerEvent.target.result
+        let data
+        try {
+          data = JSON.parse(content)
+        } catch(e) {
+          alert("Broken JSON. This does not seem to be a valid plugin file.")
+          return
+        }
+        if (data.appName !== appMetaData.appIdentifierName) {
+          alert(`This does not seem to be a valid plugin file. ` +
+          `I was expecting the "appName" property to have ` +
+          `the value "${appMetaData.appIdentifierName}". `)
+          return
+        }
+        
+        if (!data.isPlugin) {
+          alert(`This does not seem to be a valid plugin file. ` +
+            `I was expecting the "isPlugin" property to be true.`)
+          return
+        }
+
+        if ( !utils.isArray(data.links) ) {
+          alert(`This does not seem to be a valid plugin file. ` +
+            `I was expecting the "links" property to be an array.`)
+          return
+        }
+
+        const mandatory = ["id", "name", "author", "licenseShort",
+        "licenseText", "version", "copyrightInfo", "shortInfo", "documentation"]
+
+        for (let prop of mandatory) {
+          if (! utils.isString(data[prop]) || data[prop] === "" ) {
+            alert(`This does not seem to be a valid plugin file. ` +
+              `The property "${prop}" should be a non-empty string.`)
+            return
+          }
+        }
+
+        for ( let plugin of $_PLUGIN.getAll() ) {
+          if (plugin.id === data.id) {
+            alert(`A plugin with id "${data.id}" has already been loaded.`)
+            return
+          }
+        }
+
+        if ( !isPluginCompatible(data) ) {
+          alert(`Incompatible plugin file. This plugin is not compatible with app `
+            + `version "${appMetaData.version}"`)
+          return
+        }
+
+        addNewPlugin(data)
+      }
+    }
+    input.click()
+  }
+
+  function addNewPlugin(plugin) {
+    window.$_PLUGIN.add(plugin)
+    updatePluginView()
+    saveSession()
+  }
+
+  function updatePluginView() {
+    //inject etc.
+    const el = document.getElementById("tab-content-plugins")
+    let out = `<button onclick="loadPlugin()">Load plugin</button>
+    <div style="width: 100%; height: 1px; background: #ccc; margin-top: 12px"></div>`
+    const plugins = $_PLUGIN.getAll()
+    let i = -1
+    for (let plugin of plugins) {
+      let size = "?"
+      if (plugin.implementation.js) {
+        size = getApproximateByteSize(plugin.implementation.js)
+      }
+      i++
+      const id = Math.random() + "/" + Math.random()
+      let checki = ""
+      if (pluginsEnabled[i]) checki = "checked"
+      const deleteButton = !plugin.builtIn ?
+        `<button onclick='window.deletePlugin(${i})'>delete</button>` : ""
+      out += `
+      <div class="plugin-view-entry">
+        <p>
+          ${plugin.logo || ""} ${plugin.name} by ${plugin.author}
+        </p>
+        <p>
+          ${plugin.shortInfo}
+        </p>
+        <p>
+          version: ${plugin.version} / size: ${size}
+        </p>
+        <p>
+        enabled: <input type="checkbox"
+          onchange="window.clickPluginCheckbox(${i})" ${checki}>
+        </p>
+        <p>
+        <button onclick="window.viewPluginInPopup(${i})">view</button>
+        ${deleteButton}
+        </p>
+      </div>
+      `
+    }
+    el.innerHTML = out
+  }
+
 
   function updateAssetsView() {
     const el = document.getElementById("tab-content-assets-main")
@@ -259,13 +475,14 @@
     initHelp()
 
     updateAssetsView()
-
+    updatePluginView()
 
     selectTab("story", 0)
     selectTab("play", 1)
     
     
-            selectTab("assets", 0) //testing
+            //selectTab("assets", 0) //testing
+            selectTab("plugins", 0) //testing
 
     //showRunResults()
     //showPlayBox()
@@ -373,11 +590,16 @@
           alert("Broken JSON. This does not seem to be a valid save file.")
           return
         }
+
         if (data.appName !== appMetaData.appIdentifierName) {
           alert(`This does not seem to be a valid save file.`)
           return
         }
         
+        if (!data.appStorySaveState) {
+          alert(`This does not seem to be a valid save file.`)
+        }
+
         if ( !isVersionNumberCompatible(data.appVersion) ) {
           alert(`Incompatible save file. The save file has version "${data.appVersion}", but the app `
             + `has version "${appMetaData.version}"`)
@@ -393,6 +615,17 @@
   function isVersionNumberCompatible(nr) {
     return nr === appMetaData.version
   }
+
+  function isPluginCompatible(plugin) {
+    if (!plugin.compatiblewithVersions) return false
+    for (let item of plugin.compatiblewithVersions) {
+      if (item === appMetaData.version) {
+        return true
+      }
+    }
+    return false
+  }
+
 
 
   function clickSave() {
@@ -549,7 +782,8 @@
     }
     v = `;window.$__RUNTIME_MODE = "${mode}";storyData = ` + JSON.stringify(v)
     const htmlContent = codeMirrorHtml.getValue()
-    let html = createHtmlTemplate(htmlContent, v)
+    const plugins = window.$_PLUGIN.getAll()
+    let html = createHtmlTemplate(htmlContent, v, plugins, pluginsEnabled)
     return html
   }
 

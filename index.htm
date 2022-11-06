@@ -25,6 +25,14 @@
 
     <link rel="stylesheet" href="code-mirror-lib/codemirror.css">
 
+    <script src="libs/FileSaver.min.js"></script>
+
+    <script src="pluginManager.js"></script>
+
+    <script src="builtin-plugins/seedrandom.js"></script>
+    <script src="builtin-plugins/howler.js"></script>
+
+
   </head>
 
   <body>
@@ -33,6 +41,7 @@
         <div class="tab tab-left tab-chosen" id="tab-story" onclick="selectTab('story', 0)">Story</div>
         <div class="tab tab-left" id="tab-html" onclick="selectTab('html', 0)">HTML</div>
         <div class="tab tab-left" id="tab-assets" onclick="selectTab('assets', 0)">Assets</div>
+        <div class="tab tab-left" id="tab-plugins" onclick="selectTab('plugins', 0)">Plugins</div>
       </div>
       <div class="tab-bar" id="tab-bar">
         <div class="tab tab-right tab-chosen" id="tab-play" onclick="selectTab('play', 1)">Play</div>
@@ -50,6 +59,8 @@
             <input type="file" id="asset-file-input" style="display: none">
           </div>
           <div id="tab-content-assets-main"></div>
+        </div>
+        <div class="tab-content-left" id="tab-content-plugins">
         </div>
       </div>
 

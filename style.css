@@ -93,6 +93,7 @@ body {
 
 }
 
+
 .bottom {
   grid-area: bottom;
 }
@@ -213,6 +214,21 @@ pre {
     - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
 }
 
+.plugin-view-entry {
+  border-bottom: 1px solid #CCC;
+}
+
+
+
+#tab-content-plugins {
+  background: white;
+  color: #222;
+  height: calc(100vh - var(--assets-tools-bar-height)
+    - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
+  padding: 12px;
+  overflow: auto;
+}
+
 
 #tab-content-assets-button-holder {
   background: #CCC;
@@ -281,4 +297,3 @@ input {
   border-radius: 4px;
   border: 1px solid #888;
 }
-

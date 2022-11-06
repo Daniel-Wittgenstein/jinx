@@ -1,0 +1,24 @@
+{
+  "implementation":{
+     "js":"alert('Demo Plugin works!')"
+  },
+  "isPlugin":true,
+  "appName":"jinx",
+  "compatiblewithVersions": ["0.1"],
+  "name":"Demo Plugin",
+  "id":"demoPlugin",
+  "author":"Jinx Core Team",
+  "copyrightInfo":"(c) 2022 Jinx Core Team",
+  "version":"0.0.1",
+  "licenseShort":"Public Domain",
+  "links":[
+     
+  ],
+  "licenseText":"I release this into the public domain.",
+  "shortInfo":"Demo test plugin",
+  "documentation":"Just a demo test plugin.",
+  "logo":":)",
+  "licenseTextMustBeIncludedInFinalGame":false,
+  "disclaimer":"-",
+  "bundledBy":"-"
+}

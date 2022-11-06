@@ -512,12 +512,12 @@ jinx = (function() {
 
 
     getFixedUpChoices(choices) {
-      function convertItem(choice) {
+      function convertItem(choice) { 
         if (errorHappened) return
         let text = choice.text
         let result = that.evalText(text)
         if (result.error) {
-          errorHappened = true
+          errorHappened = true 
           const msg = result.msg.replace("XXX", `the choice on line ` +
             choice.lineNr)
           that.rtError(choice.lineNr, msg, false)
