@@ -112,4 +112,6 @@ $_PLUGIN.add({
   disclaimer: `The authors of this JavaScript library are not
     affiliated with the Jinx project in any way.`,
   bundledBy: `Jinx Core Team`,
+  additionalInfo: `The provided "jin" interface functions are not part of the original SeedRandom library.
+  They have been added by the Jinx Core Team.`,
 })
