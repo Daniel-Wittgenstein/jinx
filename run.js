@@ -91,11 +91,7 @@
   }
 
   let assetsData = {
-    assets: {
-      "bla": {
-        name: "bla",
-      }
-    },
+    assets: {},
   }
 
   function getAssetsData() {
