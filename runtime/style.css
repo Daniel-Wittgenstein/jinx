@@ -86,6 +86,7 @@ div {
 }
 
 .choice-only-one {
+  margin-top: 40px;
   border-radius: var(--choice-radius) var(--choice-radius) var(--choice-radius) var(--choice-radius);
 }
 
