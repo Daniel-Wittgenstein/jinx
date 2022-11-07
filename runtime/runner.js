@@ -12,6 +12,11 @@
     allText: [],
   }
 
+  let delayParagraphs = 30
+  let delayChoices = 30
+
+
+
   const DEFAULT_ORDER_ASSET_INJECTOR = 10 //since asset injecting
     //is realized as an effect, too, it has an order number.
 
@@ -25,6 +30,16 @@
     //and displays error information if an error occurs.
     //use throw new Error(`), NOT throw `` because only that
     //displays erros correctly.
+
+    setDelay: (mode, time) => {
+      if (mode === "paragraphs") {
+        delayParagraphs = time
+      } else if (mode === "choices") {
+        delayParagraphs = time
+      } else {
+        throw new Error(`setDelay: mode must be "paragraphs" or "choices"`)
+      }
+    },
 
     createVariableStore: (key) => {
       //creates a new global variable store for the story author
@@ -285,7 +300,7 @@
     let choices = contents.choices
     let paragraphs = contents.paragraphs
     let delay = 0
-    const delayInterval = 30
+    let delayInterval = delayParagraphs
     if (!paragraphs) return
     //console.log(222, paragraphs)
     for (let p of paragraphs) {
@@ -299,6 +314,7 @@
       delay += delayInterval
     }
 
+    delayInterval = delayChoices
     let index = -1
     for (let c of choices) {
       setTimeout( () => {
