@@ -399,12 +399,53 @@
     )
   }
 
+  function initExampleSelector() {
+    const el = document.getElementById("example-selector")
+    let out = ""
+    out += `<option value="$none">-</option>`
+    for ( let example of $_EXAMPLE.getAllExamples() ) {
+      out += `<option value="${example.id}">${example.name}</option>`
+    }
+    el.innerHTML = `Open Example:&nbsp;
+      <select id="example-selector-selector">
+        ${out}
+      </select>
+    `
+    $("#example-selector-selector").on("change", function (ev) {
+      const target = this.value
+      if (target === "$none") return
+      let theExample = false
+      for ( let example of $_EXAMPLE.getAllExamples() ) {
+        if (target === example.id) {
+          theExample = example
+          break
+        }
+      }
+      if (!theExample) throw new Error(`Error: example??`)
+      loadExample(theExample)
+    })
+  }
+
+  function loadExample(example) {
+    $("#example-selector-selector").val("$none")
+    
+    if (window.confirm(`Opening an example project will delete all current changes. ` +
+      `It's recommended to download a save file first. Do you really want to open `+
+      `the example project now?`)) {
+      setStoryData(example.data)
+      saveSession()
+    }
+    
+  }
+
 
   let IS_FULLSCREEN = false
 
   function start() {
 
     //console.clear()
+
+    initExampleSelector()
 
     initAddAssetsButton()
 
