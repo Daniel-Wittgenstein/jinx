@@ -432,7 +432,9 @@
     if (window.confirm(`Opening an example project will delete all current changes. ` +
       `It's recommended to download a save file first. Do you really want to open `+
       `the example project now?`)) {
-      setStoryData(example.data)
+      let data = example.data
+      data = JSON.parse( JSON.stringify(data) )
+      setStoryData(data)
       saveSession()
     }
     
