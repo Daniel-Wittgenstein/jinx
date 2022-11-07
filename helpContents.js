@@ -443,6 +443,159 @@ window.HELP_CONTENTS = `
     a lot more going on.
   </p>
 
+  <h3>Using plugins</h3>
+  <p>Go to the plugin tab. You can enable and disable plugins
+  by clicking the corresponding checkbox. If you click on the "view" button,
+  you will be shown the plugin's documentation. Make sure to read it,
+  so you know how to use the plugin.</p>
+
+
+  <h3>Creating your own plugin</h3>
+  <p>
+  You cannot really write your own plugin without some knowledge
+  of either JavaScript or CSS. This is a rather advanced topic, so feel free to skip it,
+  if it is of no interest to you.
+  </p>
+  <p>
+  Plugins are actually conceptually simple.
+  They just inject some JavaScript and/or CSS into the game.
+  </p>
+  <p>
+  A plugin is a single JSON file.
+
+  It can be loaded from the plugin view via the button "load plugin".
+
+  This is the basic anatomy of a plugin:
+  </p>
+
+  <p>
+  Example plugin:
+  <pre>
+  {
+    "implementation":{
+      "js":"alert('Demo plugin works!')"
+    },
+    "isPlugin":true,
+    "appName":"jinx",
+    "compatiblewithVersions": ["0.1"],
+    "name":"Demo Plugin",
+    "id":"demoPlugin",
+    "author":"Jinx Core Team",
+    "copyrightInfo":"(c) 2022 Jinx Core Team",
+    "version":"0.0.1",
+    "licenseShort":"Public Domain",
+    "links":[
+      
+    ],
+    "licenseText":"I release this into the public domain.",
+    "shortInfo":"Demo test plugin",
+    "documentation":"Just a demo test plugin.",
+    "logo":":)",
+    "licenseTextMustBeIncludedInFinalGame":false,
+    "disclaimer":"-",
+    "bundledBy":"-"
+  }
+  </pre>
+  </p>
+
+  <p>
+  To be a valid plugin, the JSON file has to conform to the following specification.
+  </p>
+
+  <p>
+  <b>The following properties are mandatory for every plugin:</b><br><br>
+
+  - isPlugin: must be true<br><br>
+  - appName: must be "jinx"<br><br>
+  - compatibleWithVersions: an array of strings. Each string should be a valid version number.
+    The array lists all the Jinx versions the plugin is compatible with,
+    so for example ["0.1", "0.2"] would mean that the plugin is compatible
+    with Jinx version "0.1" and Jinx version "0.2". The Jinx version you are currently
+    using can be seen by clicking the about (question mark) button in the app.
+    This is actually used by the app. If the plugin is not compatible
+    with the current app version, it will fail to load.<br><br>
+  - name: a string. the name of the plugin that will be displayed to the user. Usually a single word.<br><br>
+  - id: a string. This must be unique. Make sure there are no other plugins with the
+    same id string.<br><br>
+  - author: a string. The name(s) of the plugin author(s).<br><br>
+  - copyrightInfo: a string containing copyright information.<br><br>
+  - version: a string containing the version number of the plugin. This is not actually used
+    by the app, it is just displayed to the user.<br><br>
+  - licenseShort: a short abbreviation indicating the license type, for example "MIT"
+    to indicate the MIT license.<br><br>
+  - links: an array of objects. The array can also be empty. Each object in the array
+    should have the properties "text" (a string: the link text) and "target"
+    (a string: the internet site the link points to). These links will be displayed
+    in the "view plugin" panel.<br><br>
+  - licenseText: a string. The entire text of the license this plugin is released under.<br><br>
+  - shortInfo: a string. A short text (one sentence, typically) that tells what the plugin
+    does.<br><br>
+  - documentation: a string. Everything the user needs to know to use this plugin.
+    This string can be very long. It is also allowed to contain HTML tags to make
+    the content more readable.<br><br>
+
+  <b>The following properties should NOT be used, because they are reserved for built-in plugins.
+  Leave them undefined:</b><br><br>
+    - builtIn: true,<br><br>
+    - enabledByDefault: true/false,<br><br>
+
+  <b>The following properties are optional:</b><br><br>
+  - logo: a string containing a single emoji character. This is used to depict the plugin
+      inside the app, to make it visually more recognizable. This has no effect on the
+      functionality of the plugin whatsoever, it's just eye-candy.<br><br>
+
+  - licenseTextMustBeIncludedInFinalGame: a boolean indicating whether the entire text
+      of the license should be copied into the source code of the final exported game.
+      Set this to true to include the license text. Leave it undefined or set it to false
+      to not include the license text.<br><br>
+
+  <b>Other optional properties:</b><br><br>
+
+  All other properties <i>containing a string</i> are okay to use but they have no special meaning.
+
+  For example you could add a property "additionalInfo" with content "some text ..."
+  to your plugin. The string will be displayed to the user in the plugin view, but it does
+  not do anything else than that.
+
+
+  </p>
+
+
+  <p>
+  The above properties of the plugin are all meta-data.
+
+  The property "implementation" is where the actual work happens.
+
+  Example:
+  <pre>
+  ...
+    "implementation": {
+      "js":"alert('Demo plugin works!')"
+    },
+  ...
+  </pre>
+
+  The property "implementation" has to contain an object.
+  The object can have two (optional) properties.<br><br>
+
+  - "js": this property can be a single string or an array of strings.
+    The content of the strings is injected into the game as JavaScript.<br><br>
+
+  - "css: this property must be a string. The content of the string
+    is injected into the game as CSS.<br><br>
+
+  Basically, plugins are just containers that wrap some JavaScript or CSS.
+
+  There is not a lot more going on.
+
+  Often, plugins need to access the Jinx API. The API methods are
+  exposed via the global object called "jin". They are described
+  in another section.
+
+  </p>
+
+
+
 
 
 
