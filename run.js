@@ -136,7 +136,7 @@
 
     if (plugin.links) {
       for (let link of plugin.links) {
-        out += `<p><a href="${link.target}">${link.text}</a></p>`
+        out += `<p><a href="${link.target}" target="_blank">${link.text}</a></p>`
       }
     }
 
