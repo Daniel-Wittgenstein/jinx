@@ -6,7 +6,14 @@
 
   window.onload = startP
 
-  const registeredEffects = {}
+  const registeredEffects = {
+    paragraphText: [],
+    choiceText: [],
+    allText: [],
+  }
+
+  const DEFAULT_ORDER_ASSET_INJECTOR = 10 //since asset injecting
+    //is realized as an effect, too, it has an order number.
 
   let randomSeed = false
   let randomNumberGenerator = false
@@ -75,18 +82,17 @@
       return variableStores
     },
 
-
     asset(name) { //simple getAsset data function for story creator
       let x = storyData.assetsData.assets[name]
       if (x) return x.data
       return false
     },
 
-
     createEffect: (type, func, order = 0) => {
       // an effect for story start would be useful, too
       // and maybe even output filters could be done as effects, why not
-      const allowed = ["after", "before", "onVariableChange", "set", "get"]
+      const allowed = ["after", "before", "onVariableChange", "set", "get",
+        "loadApp", "paragraphText", "choiceText", "allText"]
       if (!type) {
         throw new Error(`createEffect: no parameters passed to function?`)
       }
@@ -181,8 +187,9 @@
           window.parent.window.emitRuntimeMessage({action: "load"})
         }
       }
-
     })
+
+    initAssetInjector()
 
     story = createJinxStory(storyData.content, onError, onStoryEvent)
     if (story.compilationFailed) {
@@ -196,6 +203,20 @@
   function createJinxStory(storyContent, onErrorFunc, onStoryEvent) {
     let story = jinx.createNewStory(storyContent, onErrorFunc, onStoryEvent)
     return story
+  }
+
+  function initAssetInjector() {
+    function injectAssets(text) {
+      text = text.replace(/\$asset\(.*?\)/g, (n) => {
+        n = n.replace("$asset(", "").replace(")", "").trim()
+        let el = storyData.assetsData.assets[n]
+        //$asset(asset "${n}" does not exist)
+        if (!el) return ""
+        return el.data
+      })
+      return text
+    }
+    jin.createEffect("allText", injectAssets, DEFAULT_ORDER_ASSET_INJECTOR)
   }
 
   function onError(err) {
@@ -228,15 +249,35 @@
   }
   
   function preProcessParagraphText(text) {
-    text = text.replace(/\$asset\(.*?\)/g, (n) => {
-      n = n.replace("$asset(", "").replace(")", "").trim()
-      let el = storyData.assetsData.assets[n]
-      //$asset(asset "${n}" does not exist)
-      if (!el) return ""
-      return el.data
-    })
+    const effectList = registeredEffects.paragraphText
+      .concat(registeredEffects.allText).sort(
+        (a, b) => {
+          return a.order - b.order
+        }
+      )
+    text = pipeThroughFuncList(text, effectList, "func")
     return text
   }
+
+  function preProcessChoiceText(text) {
+    const effectList = registeredEffects.choiceText
+      .concat(registeredEffects.allText).sort(
+        (a, b) => {
+          return a.order - b.order
+        }
+      )
+    text = pipeThroughFuncList(text, effectList, "func")
+    return text
+  }
+
+  function pipeThroughFuncList(text, list, prop) {
+    for (let item of list) {
+      text = item[prop](text)
+    }
+    return text
+  }
+
+
 
   function renderStuff() {
     let contents = story.getContents()
@@ -268,9 +309,10 @@
         if (choices.length === 1) cl = "choice-only-one"        
         let el = document.createElement("button")
         mainOutputElement.appendChild(el)
+        const ttext = preProcessChoiceText(c.text)
         el.outerHTML = `<button
           class="story-choice ${cl}"
-          data-choiceindex='${c.index}'>${c.text}</button>`
+          data-choiceindex='${c.index}'>${ttext}</button>`
       }, delay)
       delay += delayInterval
     }
