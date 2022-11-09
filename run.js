@@ -40,7 +40,7 @@
     try {
       v = JSON.parse(savData)
     } catch(e) {
-      alert("Load session: corrupted localStorage? Could not load last session. Sorry.")
+      alerta("Load session: corrupted localStorage? Could not load last session. Sorry.")
       return
     }
     //codeMirror.setValue(v.story)
@@ -177,12 +177,16 @@
   }
 
   window.deletePlugin = (i) => {
-    if (window.confirm(`Do you really want to delete this plugin? ` +
-      `(After deletion, the plugin cannot be restored without the original plugin file.)`)) {
+    const yesDoIt = () => {
       $_PLUGIN.deletePlugin(i)
       updatePluginView()
       saveSession()
     }
+    confirma(`Do you really want to delete this plugin? ` +
+      `(After deletion, the plugin cannot be restored without the original plugin file.)`,
+      "Yes, delete the plugin!", yesDoIt,
+      "Cancel", () => {},
+      )
   }
 
   window.loadPlugin = (i) => {
@@ -198,24 +202,24 @@
         try {
           data = JSON.parse(content)
         } catch(e) {
-          alert("Broken JSON. This does not seem to be a valid plugin file.")
+          alerta("Broken JSON. This does not seem to be a valid plugin file.")
           return
         }
         if (data.appName !== appMetaData.appIdentifierName) {
-          alert(`This does not seem to be a valid plugin file. ` +
+          alerta(`This does not seem to be a valid plugin file. ` +
           `I was expecting the "appName" property to have ` +
           `the value "${appMetaData.appIdentifierName}". `)
           return
         }
         
         if (!data.isPlugin) {
-          alert(`This does not seem to be a valid plugin file. ` +
+          alerta(`This does not seem to be a valid plugin file. ` +
             `I was expecting the "isPlugin" property to be true.`)
           return
         }
 
         if ( !utils.isArray(data.links) ) {
-          alert(`This does not seem to be a valid plugin file. ` +
+          alerta(`This does not seem to be a valid plugin file. ` +
             `I was expecting the "links" property to be an array.`)
           return
         }
@@ -225,7 +229,7 @@
 
         for (let prop of mandatory) {
           if (! utils.isString(data[prop]) || data[prop] === "" ) {
-            alert(`This does not seem to be a valid plugin file. ` +
+            alerta(`This does not seem to be a valid plugin file. ` +
               `The property "${prop}" should be a non-empty string.`)
             return
           }
@@ -233,13 +237,13 @@
 
         for ( let plugin of $_PLUGIN.getAll() ) {
           if (plugin.id === data.id) {
-            alert(`A plugin with id "${data.id}" has already been loaded.`)
+            alerta(`A plugin with id "${data.id}" has already been loaded.`)
             return
           }
         }
 
         if ( !isPluginCompatible(data) ) {
-          alert(`Incompatible plugin file. This plugin is not compatible with app `
+          alerta(`Incompatible plugin file. This plugin is not compatible with app `
             + `version "${appMetaData.version}"`)
           return
         }
@@ -336,7 +340,7 @@
         let j = -1
 
         if ( !isLegalAssetName(nuName) ) {
-          alert(`Asset name contains illegal character.`)
+          alerta(`Asset name contains illegal character.`)
           return
         }
 
@@ -351,7 +355,7 @@
             //do absolutely nothing, except returning
             return
           }
-          alert(`Could not rename this asset.` + 
+          alerta(`Could not rename this asset. ` + 
             `Another asset named "${nuName}" exists already.`)
           return
         }
@@ -427,17 +431,19 @@
   }
 
   function loadExample(example) {
-    $("#example-selector-selector").val("$none")
-    
-    if (window.confirm(`Opening an example project will delete all current changes. ` +
-      `It's recommended to download a save file first. Do you really want to open `+
-      `the example project now?`)) {
+    const openProjYes = () => {
       let data = example.data
       data = JSON.parse( JSON.stringify(data) )
       setStoryData(data)
       saveSession()
     }
-    
+    $("#example-selector-selector").val("$none")
+    confirma(`Opening an example project will delete all current changes. ` +
+      `It's recommended to download a save file first. Do you really want to open `+
+      `the example project now?`,
+      "Yes, open it anyway!", openProjYes,
+      "Cancel", () => {}
+    )
   }
 
 
@@ -588,7 +594,7 @@
   
   function addAsset(type, subType, dataUrl, name) {
     if (assetsData.assets[name]) {
-      alert(`Duplicate asset name`) //should not happen, since we automatically
+      alerta(`Duplicate asset name`) //should not happen, since we automatically
         //add numbers for disambiguation, but just to be sure
       return
     }
@@ -617,7 +623,7 @@
   }
 
   function clickAbout() {
-    alert(`JinxEdit version ${appMetaData.version}`)
+    alerta(`JinxEdit version ${appMetaData.version}`)
   }
 
 
@@ -634,21 +640,21 @@
         try {
           data = JSON.parse(content)
         } catch(e) {
-          alert("Broken JSON. This does not seem to be a valid save file.")
+          alerta("Broken JSON. This does not seem to be a valid save file.")
           return
         }
 
         if (data.appName !== appMetaData.appIdentifierName) {
-          alert(`This does not seem to be a valid save file.`)
+          alerta(`This does not seem to be a valid save file.`)
           return
         }
         
         if (!data.appStorySaveState) {
-          alert(`This does not seem to be a valid save file.`)
+          alerta(`This does not seem to be a valid save file.`)
         }
 
         if ( !isVersionNumberCompatible(data.appVersion) ) {
-          alert(`Incompatible save file. The save file has version "${data.appVersion}", but the app `
+          alerta(`Incompatible save file. The save file has version "${data.appVersion}", but the app `
             + `has version "${appMetaData.version}"`)
           return
         }
@@ -892,6 +898,43 @@
     if (message.action === "load") {
       clickLoad()
     }
+  }
+
+  function alerta(txt) {
+    Swal.fire({
+      text: txt,
+      confirmButtonColor: '#3085d6',
+      showClass: {
+        popup: 'alert-anim'
+      },
+      hideClass: {
+        popup: ''
+      },
+    })
+  }
+
+  function confirma(txt, confirmButtonText, confirmFunc,
+      cancelButtonText, cancelFunc) {
+    Swal.fire({
+      showClass: {
+        popup: 'alert-anim'
+      },
+      hideClass: {
+        popup: ''
+      },
+      text: txt,
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: cancelButtonText,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        confirmFunc()
+      } else {
+        cancelFunc()
+      }
+    })
   }
 
 
