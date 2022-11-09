@@ -176,7 +176,12 @@ jinx = (function() {
             let err = false
             if (key === "correspondingIf" && targetLine.type !== "if") err = true
             if (key === "correspondingElse" && targetLine.type !== "else") err = true
-            if (key === "correspondingEnd" && targetLine.type !== "end") err = true
+            if (key === "correspondingEnd" && targetLine.type !== "end"
+              && line.type !== "js-start") err = true
+
+            if (key === "correspondingEnd" && targetLine.type !== "js-end"
+              && line.type === "js-start") err = true
+              
             if (err) {
               console.log("error at line:", line)
               throw new Error(`Fatal error. line.${key} does NOT point to an
@@ -609,6 +614,16 @@ jinx = (function() {
       paragraphs = paragraphs.filter(n => n.text)
 
       return paragraphs
+    }
+
+    execJsstart(line) {
+      console.log("execing js", line)
+      return "advanceByOne"
+    }
+
+    execJsend(line) {
+      console.log("execing js end", line)
+      return "advanceByOne"
     }
 
     execEmpty(line) {
