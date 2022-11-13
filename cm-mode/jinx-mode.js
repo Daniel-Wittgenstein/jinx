@@ -15,7 +15,7 @@ CodeMirror.defineSimpleMode("jinx", {
     {sol: false, regex: /\<[\s\S]*?\>/, token: "html-tag" },
 
 
-    {sol: true, regex: /\s*\.js/, token: "multi-line-js", mode: {spec: "javascript", end: /\.jsend/}},
+   // {sol: true, regex: /\s*\.js/, token: "multi-line-js", mode: {spec: "javascript", end: /\.jsend/}},
     {sol: true, regex: /\s*\/\/.*/, token: "comment"},
     {sol: true, regex: /\s*\#.*/, token: "single-line-js"},
     {sol: true, regex: /\s*\=\=\=.*/, token: "knot-heading"},
