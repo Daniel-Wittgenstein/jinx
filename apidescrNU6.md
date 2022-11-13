@@ -218,21 +218,20 @@ jin.createEffect("get", effectFunction:function, [order:integer])
 
 ***
 
-
 jin.createEffect("loadApp", effectFunction:function, [order:integer])
   return value: undefined
 
-  This is probably even less commonly used than a setter.
+  "loadApp" effects are run when the app starts. That means
+  they are run after the HTML page has finished loading
+  and your Jinx game has been loaded and initialized.
 
-  Pass a function. The function that was passed will be used
-  as the getter function for all global variables.
+  The getter function will be passed one parameter:
+  1. the Jinx story object
 
-  The getter function will be passed three parameters:
-  1. the name of the global variable as a string
-  2. the current value of the global variable (can be of type number, string, object, array or boolean)
-  3. the name of the global store the variable belongs to as a key ("v" is the default).
-  
-  The getter function should return the value the variable will evaluate to.
+  You should NEVER modify the Jinx story object that is passed to this function.
+
+***
+
 
 
 
