@@ -1,6 +1,8 @@
 
 ;(function() {
-  const DEBUG = {}
+  const DEBUG = {
+    showDebugTab: false,
+  }
 
   const appMetaData = {
     appIdentifierName: "jinx", //written into save file. note that changing this
@@ -450,6 +452,10 @@
   let IS_FULLSCREEN = false
 
   function start() {
+
+    if (DEBUG.showDebugTab) {
+      $("#tab-debug").show()
+    }
 
     //console.clear()
 
