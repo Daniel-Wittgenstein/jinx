@@ -104,8 +104,6 @@
     },
 
     createEffect: (type, func, order = 0) => {
-      // an effect for story start would be useful, too
-      // and maybe even output filters could be done as effects, why not
       const allowed = ["after", "before", "onVariableChange", "set", "get",
         "loadApp", "paragraphText", "choiceText", "allText"]
       if (!type) {
@@ -211,12 +209,26 @@
       return
     }
     console.log("%c RESTARTING STORY", "background: yellow; color: black;")
-    story.restart()
+
+    //todo: custom loadappeffects can handle auto-loading last story state from localStorage, too
+    //just set a new story state before story.kickOff() is called
+
+    doLoadAppEffects()
+
+    story.kickOff()
   }
   
 
+  function doLoadAppEffects(story) {
+    if (registeredEffects.loadApp) {
+      for (let effect of registeredEffects.loadApp) {
+        effect.func(story)
+      }
+    }
+  }
+
   function createJinxStory(storyContent, onErrorFunc, onStoryEvent) {
-    let story = jinx.createNewStory(storyContent, onErrorFunc, onStoryEvent)
+    let story = window.jinx.createNewStory(storyContent, onErrorFunc, onStoryEvent)
     return story
   }
 
@@ -253,7 +265,6 @@
     `
     document.write(out)
   }
-
 
 
   function onStoryEvent(type) {

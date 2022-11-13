@@ -19,7 +19,7 @@ notes:
 usage:
   let str = `String containining your story in Jinx code.`
   let story = jinx.createNewStory(str, (err) => {console.log("error occurred:", err)}, storyEventFunc)
-  story.restart b ()
+  story.kickOff()
 
 */
 
@@ -62,6 +62,8 @@ jinx = (function() {
         this.compilationFailed = true
         return
       }
+
+      this.resetState()
       
     }
 
@@ -332,18 +334,21 @@ jinx = (function() {
       this.executeLine(this.pointer)
     }
     
-    restart() {
+    resetState() {
       //public
-      //(re)starts story from the beginning
       this.flushGatherState()
       this.flushStoryState()
       this.pointer = 0
       this.inited = true
       this.securityCounter = 0
       this.previouslyExecutedLine = false
-      //console.log("restart, executing line now: ", this.pointer) //, this.lines[this.pointer])
+    }
+
+    kickOff() {
+      //public
       this.executeLine(this.pointer)
-    }  
+    }
+
 
     flushStoryState() {
       this.usedUpChoices = {}

@@ -87,7 +87,8 @@ window.testManager = (function() {
     for (let subTest of testObject.do) {
       i++
       window._test = {}
-      story.restart()
+      story.resetState()
+      story.kickOff()
       //let story = jinx.createNewStory(jinx.code, () => {}, () => {})
       if (verbose) console.log("Starting sub-test " + i)
       for (let item of subTest) {
