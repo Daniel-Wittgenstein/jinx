@@ -1086,10 +1086,12 @@ jinx = (function() {
 
     const firstWord = line.split(" ").map(n => n.trim()).filter(n => n)[0]
 
-    if ( firstWord === "js" ) {
+    if ( firstWord === "js" ) {  //currently not supported
       type = "js-start"
-    } else if ( firstWord === "jsend" ) {
+      type = false
+    } else if ( firstWord === "jsend" ) {  //currently not supported
       type = "js-end"
+      type = false
     } else if ( firstWord === "if" ) {
       type = "if"
     } else if ( firstWord === "else" ) {

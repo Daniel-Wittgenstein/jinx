@@ -623,7 +623,19 @@
   }
 
   function clickAbout() {
-    alerta(`JinxEdit version ${appMetaData.version}`)
+    const txt = `JinxEdit version ${appMetaData.version}`
+    Swal.fire({
+      text: txt,
+      confirmButtonColor: '#3085d6',
+      showClass: {
+        popup: 'alert-anim'
+      },
+      hideClass: {
+        popup: ''
+      },
+      imageUrl: 'assets/lol.jpeg',
+
+    })
   }
 
 

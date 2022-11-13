@@ -1,8 +1,10 @@
 
 
++ after loading new project etc. you have to click into codemirror instance
+for it to refresh. instead it should do that automatically (for both codemirrors)
 
-
-
++ add external plugin -> load demo project -> plugin is still there
+(possibly the same for open project? check)
 
 + -> is not interpreted as normal text (legacy.) remove it as token from jinx
 

@@ -118,21 +118,8 @@ window.HELP_CONTENTS = `
 
   <p># alert("Hello there!")</p>
 
-  <br>
-  <p>And you can run an entire block of text as JavaScript by enclosing
-  it with the special commands .js and .jsend :</p>
 
-  <pre>
-  
-  .js
-    //... some JavaScript code.
-    //... as many lines as you want.
-  .jsend
-
-  </pre>
-
-
-  <h3>Setting variables</h3>
+<h3>Setting variables</h3>
 
   <p>You can set variables (they must start with "v."):</p>
 
@@ -230,19 +217,6 @@ window.HELP_CONTENTS = `
     in which case nothing is displayed (same as returning an empty string)).
   </p>
 
-  <h3>Shortcut for printing variables</h3>
-
-  <p>
-  <b>NOT SUPPORTED YET:</b>
-  While you can display a variable's value with &lt;&lt;v.variableName>> just fine (see above),
-  there is a shorter way that saves you a bit of typing.
-  You can use a %:<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;You have %v.flowers flowers. Your money: %v.money. Stamina: %v.stamina% - Health: %v.health%<br>
-  There must be no space between the % and the variable name.<br>
-  (Note how the dot after money is fine. Jinx does the right thing.
-    Same for the % symbol after "v.stamina" and "v.health". It's actually
-    printed as  % symbol, because it's not followed by a word.)<br>
-  </p>
 
   <h3>Displaying images</h3>
 
@@ -605,7 +579,6 @@ window.HELP_CONTENTS = `
     <li>If an HTML tag spans several lines, it will not be highlighted correctly
     in the editor. Don't let this fool you: it will still work in the game.</li> 
 
-    <li>js/jsend is not implemented yet. Neither is %v.variable</li>
 
 
   </ul>
