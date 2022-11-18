@@ -1,6 +1,5 @@
 
 /*
-
 todo:
 + once-only choices
 + api to directly go to paragraph or label and start running from there
@@ -16,14 +15,26 @@ notes:
 + inline choices and each turn functionality are things the runner can provide.
 + they are not done by jinx
 
-usage:
-  let str = `String containining your story in Jinx code.`
-  let story = jinx.createNewStory(str, (err) => {console.log("error occurred:", err)}, storyEventFunc)
-  story.kickOff()
 
 */
 
 jinx = (function() {
+
+  function createNewStory(... args) {
+    const story = new Story(... args)
+    //only expose public methods, leave other methods private:
+    const wrapper = {
+      setState: story.setState.bind(story),
+      getState: story.getState.bind(story),
+      getContents: story.getContents.bind(story),
+      selectChoice: story.selectChoice.bind(story),
+      jumpTo: story.jumpTo.bind(story),
+      resetState: story.resetState.bind(story),
+      kickOff: story.kickOff.bind(story),
+      setTextContentMetaData: story.setTextContentMetaData.bind(story),
+    }
+    return wrapper
+  }
 
   function isString(x) {
     return x + "" === x
@@ -44,7 +55,7 @@ jinx = (function() {
 
       if (!isString(str)) throw new Error(`Jinx story must be passed a string.`)
 
-      this.securityMax = 2000 //max elements per turn to prevent infinite loops
+      this.securityMax = 5_000 //max elements per turn to prevent infinite loops
       this.onError = onError
       this.onEvent = onEvent
       let res = this.initStory(str)
@@ -196,15 +207,7 @@ jinx = (function() {
       }
     }
 
-    setState() {
-      //public
-      if (!this.inited) throw `Call story.restart() first.`
-    }
-    
-    getState() {
-      //public
-      if (!this.inited) throw `Call story.restart() first.`  
-    }
+
 
     evalText(text) {
       /* evals string containing << >> parts
@@ -272,6 +275,8 @@ jinx = (function() {
         }
         return {
           text: result,
+          lineNr: paragraph.lineNr,
+          meta: paragraph.meta,
         }
       }
       const that = this
@@ -289,6 +294,27 @@ jinx = (function() {
       }
     }
 
+
+    setState(state) {
+      //public
+      if (!this.inited) throw `Call story.restart() first.`
+      if (!state.isJinxState) throw new Error(`Not a valid Jinx state.`)
+      this.resetState()
+      this.choices = state.choices
+      this.paragraphs = state.paragraphs
+    }
+    
+    getState() {
+      //public
+      if (!this.inited) throw `Call story.restart() first.`
+      return {
+        choices: this.choices,
+        paragraphs: this.paragraphs,
+        isJinxState: true,        
+      }
+    }
+
+
     selectChoice(index) {
       //public
       //pass: choiceIndex
@@ -297,15 +323,10 @@ jinx = (function() {
 
       index = Number(index)
 
-      this.previouslyExecutedLine = false
-
       if (debug.logFlow) console.log("SELECTED CHOICE", index)
       if (!this.inited) throw `Call story.restart() first.`
       
       let ch = this.choices[index]
-
-      this.securityCounter = 0
-
       if (!ch) {
         this.rtError(-666, `Choice with index ${index} does not exist.`)
         return
@@ -313,11 +334,8 @@ jinx = (function() {
 
       this.flushGatherState()
 
-      this.doContinueFromChoice(ch)
-      //set pointer etc.
-    }
+      const choice = ch
 
-    doContinueFromChoice(choice) {
       let i = choice.internalLineNr
       let line = this.lines[i]
 
@@ -331,11 +349,28 @@ jinx = (function() {
 
       //console.log("doContinueFromChoice, CONTINUING AT LINE", i + 1)
       this.pointer =  i + 1
-      this.executeLine(this.pointer)
     }
+ 
+
+    jumpTo(knotOrLabelName) {
+      //public
+      const target = this.jumpTable[knotOrLabelName]
+      if (!target && target !== 0) {
+        this.onError({
+          error: true,
+          type: "runtime error",
+          lineNr: "?",
+          lineObj: {},
+          msg: `jumpTo: I didn't find a knot or label with name "${target}"`,
+        })
+        return {error: true}
+      }
+      this.pointer = target
+    }
+
     
     resetState() {
-      //public
+      //public (but also called from inside the class)
       this.flushGatherState()
       this.flushStoryState()
       this.pointer = 0
@@ -346,9 +381,10 @@ jinx = (function() {
 
     kickOff() {
       //public
+      this.previouslyExecutedLine = false
+      this.securityCounter = 0
       this.executeLine(this.pointer)
     }
-
 
     flushStoryState() {
       this.usedUpChoices = {}
@@ -503,13 +539,17 @@ jinx = (function() {
         to perform text substitutions. Ideally, the user
         should not use side-effect inducing stuff inside << >> blocks,
         if possible, but it's still allowed.)
+        todo to do: this probably leads to new values being rendered even if << >> was called
+        BEFORE. That is okay, but it's a gotcha. Document it.
         */
       
       //fix up paragraphs:
+
       let pars = this.internalGetParagraphs(this.paragraphBuffer)
       pars = this.convertInlineJs(pars)
       if (!pars) return //error occurred. rtError has already been issued.
       this.paragraphs = pars
+
 
       //fix up choices:
       let choices = this.getFixedUpChoices(this.choices)
@@ -543,7 +583,22 @@ jinx = (function() {
       return choices
     }
 
-
+    setTextContentMetaData(data) {
+      /* This sets the current meta data that is added to every
+      paragraph and every choice element thereafter.
+      This can be changed at any time.
+      The rationale is that you can call this via JavaScript to set some
+      data and the data will then be attached to all following paragraphs and
+      choices. The common use case for this is changing the current output container!
+      data should be a JSON-serializable object.
+      Whan you call this, a new empty line is pushed to the paragraph buffer,
+      because a call to setTextContentMetaData always implies that the last paragraph
+      CANNOT be glued together with the next one, since they may have
+      different metadata!
+      */
+      this.paragraphBuffer.push({type: "empty-line"})
+      this.currentTextContentMetaData = data
+    }
 
     
     internalGetParagraphs(buffer) {
@@ -581,13 +636,13 @@ jinx = (function() {
         return true
       })
 
-      /* 4. create the paragraph list and first paragraph item
+      /* 4. create the paragraph list and first paragraph item,
         then loop through the list of items:
         if text line:
           add it to the current paragraph (last paragraph in list) content + add a space
-        if empty line
+        if empty line:
           create a new paragraph and push it onto the paragraph list
-        if glue token
+        if glue token:
           remove last space from paragraph content
       */
       
@@ -598,6 +653,7 @@ jinx = (function() {
           const currentParagraph = paragraphs[paragraphs.length - 1]
           currentParagraph.text += item.text + " "
           currentParagraph.lineNr = item.lineNr
+          currentParagraph.meta = item.meta
         } else if (item.type === "empty-line") {
           paragraphs.push({text: ""})
         } else if (item.type === "glue") {
@@ -650,7 +706,8 @@ jinx = (function() {
         endGlue = true
       }
       if (startGlue) this.paragraphBuffer.push({type: "glue"})
-      this.paragraphBuffer.push({type: "text", text, lineNr: line.lineNr})
+      this.paragraphBuffer.push({type: "text", text, lineNr: line.lineNr,
+        meta: this.currentTextContentMetaData})
       if (endGlue) this.paragraphBuffer.push({type: "glue"})
       return "advanceByOne"
     }
@@ -718,8 +775,7 @@ jinx = (function() {
     execChoice(line) {
       //populate this.choices with choice objects containing choice text
       //(for once-only choices, future: assumes that lineNr of choice is unique,
-      //which it really should be
-      //unless there is a serious bug)
+      //which it really should be, unless there is a serious bug)
 
       if (this.previouslyExecutedLine && this.previouslyExecutedLine.level !==
         line.level) {
@@ -741,6 +797,7 @@ jinx = (function() {
         index: this.choices.length,
         internalLineNr: line.internalLineNr,
         lineNr: line.lineNr,
+        meta: this.currentTextContentMetaData,
       }
 
       let conditionOk = true
@@ -819,8 +876,6 @@ jinx = (function() {
       //dummy lines. do absolutely nothing
       return "advanceByOne"
     }
-
-
 
   } //Class story
 
@@ -979,7 +1034,6 @@ jinx = (function() {
         msg: txt,
       }
     }
-
 
     return lines
   } //annotateBlocks
@@ -1431,12 +1485,6 @@ jinx = (function() {
   function normalizeWhitespace(str) {
     return str.replace(/\t/g, " ")
   }
-
-
-  function createNewStory(... args) {
-    return new Story(... args)
-  }
-
 
   function setDebugOption(option, value = true) {
     //value should be true or false, option should be string

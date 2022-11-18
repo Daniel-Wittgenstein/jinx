@@ -10,6 +10,12 @@
     paragraphText: [],
     choiceText: [],
     allText: [],
+    before: [],
+    after: [],
+    onVariableChange: [],
+    set: [],
+    get: [],
+    loadApp: [],
   }
 
   let delayParagraphs = 30
@@ -105,7 +111,7 @@
 
     createEffect: (type, func, order = 0) => {
       const allowed = ["after", "before", "onVariableChange", "set", "get",
-        "loadApp", "paragraphText", "choiceText", "allText"]
+        "loadApp", "paragraphText", "choiceText", "allText", "beforeTextRender"]
       if (!type) {
         throw new Error(`createEffect: no parameters passed to function?`)
       }
@@ -136,22 +142,52 @@
       )
     },
 
-    goto: () => {
+    takeTurnFrom: (labelOrKnotName) => {
+      //this should be called from custom author js functions
+      //responding to some JS i-o events (like clicking on an image or similar),
+      //but it should NOT be called inline from inside the story.
+      //maybe introduce flag to prevent that usage (if feasible to implement)
+    },
+
+    say: (text) => {
 
     },
 
-    say: () => {
-
+    output: (panelId) => {
+      if (!outputContainers[panelId]) {
+        throw new Error(`jin.output("${panelId}"): There is no output panel with id "${panelId}".`)
+      }
+ 
+      story.setTextContentMetaData({
+        output: panelId,
+      })
     },
 
-    output: () => {
-
+    createPanel: (domId, options) => {
+      //domId as well as internal panel id; corresponds 1:1
+      if (!options) {
+        options = {
+          paragraphDelay: 500,
+          choicedelay: 500,
+        }
+      }
+      internalCreateContainer(domId, options)
     },
 
-    choice: () => {
-
+    getState: () => {
+      /* returns current game state as JSON-serializable object.
+      You can JSON-serialize it and store it inside local storage,
+      download it as a text file or do whatever you want with it. */
+      const state = internalGetState()
+      return state
     },
-    
+
+    setState: (state) => {
+      /* pass object returned by jin.getState. This does not just
+      set the app state but also takes care of stuff like rerendering */
+      internalSetState(state)
+      renderAllContainers()
+    },
 
 
   } //jin end
@@ -160,7 +196,25 @@
 
   let story
 
-  let mainOutputElement 
+  function internalGetState() {
+    const state = {
+      story: story.getState(),
+      outputContainers: outputContainers,
+      isRunnerState: true,
+    }
+    return state
+  }
+
+
+  function internalSetState(state) {
+    if (!state.isRunnerState) throw new Error(`Not a valid runner state.`)
+    outputContainers = state.outputContainers
+    story.setState(state.story)
+  }
+
+
+
+
  
   function onClick(event) {
     const el = event.target
@@ -169,18 +223,75 @@
       if (!index && index !== 0) {
         throw new Error("Fatal: button has no valid index.")
       }
-      mainOutputElement.innerHTML = ""
-      story.selectChoice(index)
+      startTurn({type: "selectedChoice", choiceIndex: index})
     }
+  }
+
+
+  function startTurn(action) {
+    /* 
+    pass either:
+      {type: "selectedChoice", choiceIndex: index}
+    or:
+      {type: "programmaticTrigger", target: "knotOrLabelName"}
+    */
+    function runBeforeEffects() {
+      let divert = false
+      for (let effect of registeredEffects.before) {
+        const result = effect.func()
+        if (result && result.divert) {
+          divert = result.target
+        }
+      }
+      return divert
+    }
+
+    function getActionToPerform(action, divert) {
+      let result
+      if (divert) {
+        result = {
+          mode: "jump",
+          target: divert,
+        }
+      } else {
+        if (action.type === "selectedChoice") {
+          result = {
+            mode: "choice",
+            target: action.choiceIndex,
+          }
+        } else if (action.type === "programmaticTrigger") {
+          result = {
+            mode: "jump",
+            target: action.target,
+          }
+        } else {
+          throw new Error(`Invalid type`)
+        }
+      }
+      return result
+    }
+
+    outputContainersMoveOldContentIntoOldBuffer()
+
+    const divert = runBeforeEffects()
+
+    const action2 = getActionToPerform(action, divert)
+
+    if (action2.mode === "choice") {
+      story.selectChoice(action2.target)
+    } else {
+      const result = story.jumpTo(action2.target)
+      if (result && result.error) return //error is passed from jinx via onerror, no need to do anything here
+    }
+    story.kickOff()
   }
 
 
   function startP() {
     //jinx.setDebugOption("log")
+    jin.createPanel("main")
 
     jin.createVariableStore("v")
-
-    mainOutputElement = document.getElementById("main")
 
     const rmode = window.$__RUNTIME_MODE
     console.log(`Running mode: ${rmode}`)
@@ -232,19 +343,7 @@
     return story
   }
 
-  function initAssetInjector() {
-    function injectAssets(text) {
-      text = text.replace(/\$asset\(.*?\)/g, (n) => {
-        n = n.replace("$asset(", "").replace(")", "").trim()
-        let el = storyData.assetsData.assets[n]
-        //$asset(asset "${n}" does not exist)
-        if (!el) return ""
-        return el.data
-      })
-      return text
-    }
-    jin.createEffect("allText", injectAssets, DEFAULT_ORDER_ASSET_INJECTOR)
-  }
+
 
   function onError(err) {
     outputError(err)
@@ -266,35 +365,237 @@
     document.write(out)
   }
 
+  function issueError(msg) {
+    /* This is for errors caused by the story creator that do not get passed over
+    from jinx.js, but that come directly from the runner. As such, they don't have line numbers.
+    For example an error might be thrown while rendering containers,
+    because a DOM element with the corresponding id does not exist,
+    so the HTML is erroneous, but we cannot tell where the error in the
+    HTML is. This can be partly circumvented by checking
+    whether a corresponding dom element exists when we create a new panel,
+    BUT that does not always stop the error, because the
+    story creator might even remove dom elements mid-turn.
+    Therefore it is imperative that we display these errors, even if
+    they don't have line numbers. The fact that they
+    don't have line numbers is just something that cannot be really fixed,
+    neither should one try to fix that, because it's next to impossible. */
+    outputError({
+      msg,
+      lineNr: "unknown",
+      type: "Runtime Error (runner)"
+    })
+  }
+
+
 
   function onStoryEvent(type) {
     console.log("JINX EVENT TRIGGERED:", type)
     if (type === "finishedCollecting" || type === "gameEnd") {
-      renderStuff()
+      jinxFinishedRunning()
     }
   }
-  
-  function preProcessParagraphText(text) {
-    const effectList = registeredEffects.paragraphText
-      .concat(registeredEffects.allText).sort(
-        (a, b) => {
-          return a.order - b.order
+
+
+  function jinxFinishedRunning() {
+    function runAfterEffects() {
+      let divert = false
+      for (let effect of registeredEffects.after) {
+        const result = effect.func()
+        if (result && result.divert) {
+          divert = result
         }
-      )
-    text = pipeThroughFuncList(text, effectList, "func")
-    return text
+      }
+      return divert
+    }
+
+    const divert = runAfterEffects()
+    if (divert) {
+      const result = story.jumpTo(divert)
+      if (result && result.error) return //error is passed from jinx via onerror, no need to do anything here
+      story.kickOff()
+      return
+    }
+
+    //trimOutputContainers() todo: implement later
+
+    const contents = story.getContents()
+
+    if (contents && contents.error) return
+    const clonedContents =  JSON.parse( JSON.stringify(contents) )
+    const newContents = applyTextEffectsToOutputContents(clonedContents)
+
+    //#############################
+    //divide output elements by containers:
+
+    const byContainers = {}
+    for (let para of newContents.paragraphs) {
+      let acc = "main"
+      if (para.meta && para.meta.output) acc = para.meta.output 
+      if (!byContainers[acc]) byContainers[acc] = []
+      byContainers[acc].push(para)
+    }
+
+    for ( let key of Object.keys(byContainers) ) {
+      const contents = byContainers[key]
+      pushContentToContainer(key, contents, "paragraphs")
+    }
+
+    //(note that choices will all be in the same output container, since there is no
+    //way to run js between choices, so you cannot switch output container between them either):
+    if (newContents.choices.length) {
+      const contId = newContents.choices[0]?.meta?.output || "main"
+      pushContentToContainer(contId, newContents.choices, "choices")
+    }
+
+    //now render the containers:
+    renderAllContainers()
+
   }
 
-  function preProcessChoiceText(text) {
-    const effectList = registeredEffects.choiceText
-      .concat(registeredEffects.allText).sort(
-        (a, b) => {
-          return a.order - b.order
-        }
-      )
-    text = pipeThroughFuncList(text, effectList, "func")
-    return text
+
+
+  function htmlStringToDomElement(htmlStr) {
+    const template = document.createElement('template')
+    htmlStr = htmlStr.trim()
+    template.innerHTML = htmlStr
+    const result = template.content.firstChild
+    return result
   }
+
+  function outputContainersMoveOldContentIntoOldBuffer() {
+    for ( let key of Object.keys(outputContainers) ) {
+      const container = outputContainers[key]
+      for (let item of container.content.paragraphs) {
+        container.content.oldBuffer.push(item)
+      }
+      for (let item of container.content.choices) {
+        container.content.oldBuffer.push(item)
+      }
+      //flush:
+      container.content.paragraphs = []
+      container.content.choices = []
+    }
+  }
+
+
+  function renderAllContainers() {
+    for ( let key of Object.keys(outputContainers) ) {
+      const container = outputContainers[key]
+      renderContainer(container)   
+    }
+  }
+
+
+
+  function renderContainer(container) {
+    /* This actually resets the entire innerHTML of the container.
+    So basically it rerenders the entire container every time,
+    no incremental dom element addition or diffing of any sort
+    if performed. This makes it way easier to handle things.*/
+
+    const domEl = document.getElementById(container.id)
+    if (!domEl) {
+      issueError(`HTML DOM element with id "${container.id}" does not exist.`)
+      return
+    }
+
+    let html = ""
+    let oldHtml = ""
+    
+    //generate the old content:
+    
+
+    for (let item of container.content.oldBuffer) {
+      if (item.type === "paragraphs") {
+        oldHtml += `<div class="story-paragraph old-paragraph">${item.text}</div>`
+      }
+    }
+
+    //generate the new content
+    for (let para of container.content.paragraphs) {
+      html += `<div class="story-paragraph">${para.text}</div>`
+    }
+
+    let choiceIndex = -1
+    for (let choice of container.content.choices) {
+      choiceIndex++
+      let cl = "choice-mid"
+      if (choiceIndex === 0) cl = "choice-first"
+      if (choiceIndex === container.content.choices.length - 1) cl = "choice-last"
+      if (container.content.choices.length === 1) cl = "choice-only-one"
+      html += `<button
+          class="story-choice ${cl}"
+          data-choiceindex='${choiceIndex}'>${choice.text}</button>`
+    }
+
+    //actually render:
+    const thtml = `
+      <div id="__runner-internal-old-content" style="pointer-events: none">${oldHtml}</div>
+      ${html}
+      `
+    domEl.innerHTML = thtml
+
+    //and disable as much clickable content as possible in the old content div (so you cannot
+    //click on old buttons etc.):
+    const oldEl = document.getElementById("__runner-internal-old-content")
+
+    //disable all elements and destroy inline onClick; works:
+    if (oldEl) {
+      const allEls = oldEl.querySelectorAll("*")
+      for (let el of allEls) {
+        el.disabled = true
+        el.onclick = ""
+      }
+    }
+
+
+  }
+
+
+  function pushContentToContainer(containerId, content, type) {
+    const container = outputContainers[containerId]
+    if (!container) {
+      //not rly important since this should be caught already inside jin.output
+      //if this throws, it's a developer error.
+      throw new Error(`Dev error: There is no output panel with id "${containerId}".`)
+    }
+
+    //actually add the new content to the container:
+    for (let item of content) {
+      item.type = type
+      container.content[type].push(item)
+    }
+  }
+
+  let outputContainers = {}
+
+  function internalCreateContainer(id, options) {
+    //does not create dom element, just pass id of already existing
+    //dom element and it will associate an output container with it
+    if (outputContainers[id]) {
+      throw new Error(`An output panel with id "${id}" exists already."`)
+    }
+    const outputContainer = {
+      id,
+      options,
+      content: {
+        paragraphs: [],
+        choices: [],
+        oldBuffer: [],
+      },
+    }
+    outputContainers[id] = outputContainer
+  }
+
+
+  function applyTextEffectsToOutputContents(contents) {
+    //todo shitty not beforerender text effects
+
+    return contents
+  }
+
+
+
 
   function pipeThroughFuncList(text, list, prop) {
     for (let item of list) {
@@ -302,49 +603,22 @@
     }
     return text
   }
-
-
-
-  function renderStuff() {
-    let contents = story.getContents()
-    if (contents && contents.error) return
-    let choices = contents.choices
-    let paragraphs = contents.paragraphs
-    let delay = 0
-    let delayInterval = delayParagraphs
-    if (!paragraphs) return
-    //console.log(222, paragraphs)
-    for (let p of paragraphs) {
-      setTimeout( () => {
-        let el = document.createElement("div") //divs are more powerful than p
-        el.classList.add("story-paragraph")
-        const text = preProcessParagraphText(p.text)
-        el.innerHTML = text
-        mainOutputElement.appendChild(el)
-      }, delay)
-      delay += delayInterval
+  
+  function initAssetInjector() {
+    function injectAssets(text) {
+      text = text.replace(/\$asset\(.*?\)/g, (n) => {
+        n = n.replace("$asset(", "").replace(")", "").trim()
+        let el = storyData.assetsData.assets[n]
+        //$asset(asset "${n}" does not exist)
+        if (!el) return ""
+        return el.data
+      })
+      return text
     }
-
-    delayInterval = delayChoices
-    let index = -1
-    for (let c of choices) {
-      setTimeout( () => {
-        index++
-        let cl = "choice-mid"
-        if (index === 0) cl = "choice-first"
-        if (index === choices.length - 1) cl = "choice-last"
-        if (choices.length === 1) cl = "choice-only-one"        
-        let el = document.createElement("button")
-        mainOutputElement.appendChild(el)
-        const ttext = preProcessChoiceText(c.text)
-        el.outerHTML = `<button
-          class="story-choice ${cl}"
-          data-choiceindex='${c.index}'>${ttext}</button>`
-      }, delay)
-      delay += delayInterval
-    }
-
+    jin.createEffect("beforeTextRender", injectAssets, DEFAULT_ORDER_ASSET_INJECTOR)
   }
+
+
 
 })()
 

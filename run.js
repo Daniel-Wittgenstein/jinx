@@ -159,6 +159,7 @@
       return orderA - orderB
     })
     for ( let key of os ) {
+
       if (key === "logo") continue
       const value = plugin[key]
       if ( utils.isString(value) ) {
@@ -169,6 +170,12 @@
         }
       }
     }
+
+    out += `
+      <pre class="plugin-code-view">
+      ${JSON.stringify(plugin.implementation).replaceAll("\\n", "<br>")}
+      </pre>
+    `
 
     return `<div class="plugin-long-view">${out}</div>`
   }
@@ -286,7 +293,7 @@
           ${plugin.logo || ""} ${plugin.name} by ${plugin.author}
         </p>
         <p>
-          ${plugin.shortInfo}
+          <span class = "plugin-short-info">${plugin.shortInfo}</span>
         </p>
         <p>
           version: ${plugin.version} / size: ${size}

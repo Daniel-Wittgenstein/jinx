@@ -89,6 +89,7 @@ jin.createEffect("before", effectFunction:function, [order:integer])
   but the text will be displayed before any other text.
 
   You can also use this with jin.goto to jump to another knot,
+  # THIS WILL BE CHANGED. CHANGE DOCS ACCORDINGLY WHEN FIXED #
   only with "before" Jinx will jump immediately
   to that knot (right after the player selects a choice).
 
