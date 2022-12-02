@@ -6,6 +6,12 @@
 
   window.onload = startP
 
+  window.onerror = (err) => {
+    outputError({
+      msg: err,
+    })
+  }
+
   const registeredEffects = {
     paragraphText: [],
     choiceText: [],
@@ -22,7 +28,6 @@
   let delayChoices = 30
 
 
-
   const DEFAULT_ORDER_ASSET_INJECTOR = 10 //since asset injecting
     //is realized as an effect, too, it has an order number.
 
@@ -35,7 +40,18 @@
     //from the story script is wrapped inside try/catch anyway
     //and displays error information if an error occurs.
     //use throw new Error(`), NOT throw `` because only that
-    //displays erros correctly.
+    //displays errors correctly. Well, of course, that's not
+    //the whole answer, because jin methods can be called
+    //by JS code embedded in the story, so we also
+    //have an error handler attached to window,
+    //so we can hopefully display ALL errors to the user
+    //and no error goes silently to the console
+
+    error: (msg) => {
+      //mostly for plugins:
+      //displays error
+      issueError(msg)
+    },
 
     setDelay: (mode, time) => {
       if (mode === "paragraphs") {
@@ -620,5 +636,66 @@
 
 
 
-})()
+})();
 
+ 
+
+//#####  PURELY TEST CODE. TO DELETE BEFORE DEPLOYMENT:
+
+/*
+;(function() {
+  const pluginName = "plugin simpleInterface"
+  const domPrefix = "X-simple-interface-plugin-"
+
+  jin.createEffect("loadApp", initStuff, 20)
+
+  function initStuff() {
+    if (jin.simpleInterface) {
+      jin.error(`Namespace clash: plugin jin.simpleInterface exists already?`)
+      return
+    }
+    const el = document.getElementById("app")
+    if (!el) {
+      jin.error(`${pluginName}: the plugin cannot work without a div with id "app"`)
+      return
+    }
+    const bar = document.createElement('div')
+    bar.style = `margin-bottom: 20px;`
+    bar.innerHTML = `
+      <button id="${domPrefix}load">load</button>
+      <button id="${domPrefix}save">save</button>
+      <button id="${domPrefix}erase">erase</button>
+    `
+    el.prepend(bar)
+    const loadEl = document.getElementById(`${domPrefix}load`)
+    loadEl.addEventListener("click", clickLoad)
+    const saveEl = document.getElementById(`${domPrefix}save`)
+    saveEl.addEventListener("click", clickSave)
+    const eraseEl = document.getElementById(`${domPrefix}erase`)
+    eraseEl.addEventListener("click", clickErase)
+  }
+  
+
+  function clickLoad() {
+    const state = localStorage.getItem("basicSaveState")
+    if (!state) {
+      alert("Nothing to load.")
+      return
+    }
+    const stateParsed = JSON.parse(state)
+    jin.setState(stateParsed)    
+  }
+
+  function clickSave() {
+    const state = jin.getState()
+    const stateJson = JSON.stringify(state)
+    localStorage.setItem("basicSaveState", stateJson)
+  }
+
+  function clickErase() {
+    localStorage.setItem("basicSaveState", "")
+  }
+
+
+})();
+*/
