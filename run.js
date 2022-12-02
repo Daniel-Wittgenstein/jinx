@@ -171,12 +171,17 @@
       }
     }
 
-    out += `
-      <pre class="plugin-code-view">
-      ${JSON.stringify(plugin.implementation).replaceAll("\\n", "<br>")}
-      </pre>
-    `
 
+    if (plugin.implementation.js) {
+      out += `JS:<br><textarea readonly spellcheck="false"
+        class="plugin-code-view">${plugin.implementation.js}</textarea>`
+    }
+
+    if (plugin.implementation.css) {
+      out += `<br>CSS:<br><textarea readonly spellcheck="false"
+        class="plugin-code-view">${plugin.implementation.css}</textarea>`
+    }
+    
     return `<div class="plugin-long-view">${out}</div>`
   }
 
@@ -271,7 +276,6 @@
   }
 
   function updatePluginView() {
-    //inject etc.
     const el = document.getElementById("tab-content-plugins")
     let out = `<button onclick="loadPlugin()">Load plugin</button>
     <div style="width: 100%; height: 1px; background: #ccc; margin-top: 12px"></div>`
