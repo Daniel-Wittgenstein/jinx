@@ -183,6 +183,7 @@
   window.clickPluginCheckbox = (i) => {
     pluginsEnabled[i] = !pluginsEnabled[i]
     saveSession()
+    translate({noTimeCheck: true})
   }
 
   window.deletePlugin = (i) => {
@@ -294,16 +295,11 @@
         </p>
         <p>
           <span class = "plugin-short-info">${plugin.shortInfo}</span>
-        </p>
-        <p>
-          version: ${plugin.version} / size: ${size}
-        </p>
-        <p>
+          <span class = "plugin-version-info">version: ${plugin.version} / size: ${size}</span>
+          <br><br>
         enabled: <input type="checkbox"
           onchange="window.clickPluginCheckbox(${i})" ${checki}>
-        </p>
-        <p>
-        <button onclick="window.viewPluginInPopup(${i})">view</button>
+        <button onclick="window.viewPluginInPopup(${i})" style="margin-left: 16px;">view</button>
         ${deleteButton}
         </p>
       </div>
@@ -646,8 +642,9 @@
       hideClass: {
         popup: ''
       },
-      imageUrl: 'assets/lol.jpeg',
-
+      imageUrl: 'assets/logo.png',
+      imageWidth: 240,
+      imageHeight: 240,
     })
   }
 
@@ -759,11 +756,11 @@
   }
 */
 
-  function translate() {
+  function translate(options = {}) {
     const time = + new Date()
     const diff = time - temp.lastTranslation
     temp.lastTranslation = time 
-    if (diff < settings.translateInterval * 0.75) {
+    if (!options.noTimeCheck && diff < settings.translateInterval * 0.75) {
       throw new Error (`Fatal. setTimeout bug? Only ${diff} ms passed between the last two translations.`)
     }
     saveSession()

@@ -1,12 +1,8 @@
 
-/* Default styles: */
+/* automatic CSS style for every project. Keep to a minimum. */
 
 * {
   box-sizing: border-box;
-}
-
-:root {
-  --choice-radius: 12px;
 }
 
 body {
@@ -17,87 +13,14 @@ body {
   font-size: 14px;
   font-family: Verdana, Arial, sans-serif;
   line-height: 19px;
-  text-align: left;
-}
-
-div {
-  margin: 0px;
-  padding: 0px;
-  border: 0px solid grey;
-}
-
-#wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100vw;
-  overflow: auto;
-}
-
-#mid {
-  width: 100%;
-  max-width: 720px;
-}
-
-#top-bar {
-  height: 48px;
-}
-
-#main {
-  margin: 0px;
-  padding: 0px;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 36px;
-}
-
-.story-choice {
-  background: #eee;
-  color: #222;
-  width: 75%;
-  border: none;
-  display: block;
-  margin: 0 auto;
-  margin-top: 0px;
-  margin-bottom: 2px;
-  cursor: pointer;
-  padding: 12px;
-  font-size: 14px;
-  font-family: Verdana, Arial, sans-serif;
-  line-height: 19px;
-  cursor: pointer;
-}
-
-.story-choice:hover {
-  background: #444;
-  color: #FFF;
-}
-
-.choice-first {
-  margin-top: 40px;
-  border-radius: var(--choice-radius) var(--choice-radius) 0px 0px;
-}
-
-.choice-mid {
-  border-radius: 0px;
-}
-
-.choice-last {
-  border-radius: 0px 0px var(--choice-radius) var(--choice-radius);
-}
-
-.choice-only-one {
-  margin-top: 40px;
-  border-radius: var(--choice-radius) var(--choice-radius) var(--choice-radius) var(--choice-radius);
 }
 
 .story-paragraph {
   /* This is a story paragraph.
-  Only they are actually displayed as DIVs, not Ps
-  */
+  Only they are actually displayed as DIVs, not Ps */
   margin-bottom: 14px;
 }
 
-
 .old-paragraph {
-  font-size: 8px;
+  opacity: 0.75;
 }

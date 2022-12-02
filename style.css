@@ -214,10 +214,6 @@ pre {
     - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
 }
 
-.plugin-view-entry {
-  border-bottom: 1px solid #CCC;
-}
-
 
 
 #tab-content-plugins {
@@ -228,19 +224,7 @@ pre {
   padding: 12px;
   overflow: auto;
 }
-.plugin-long-view {
-  font-size: 12px;
-  color: #333;
-}
 
-.plugin-documentation-box {
-  font-size: 14px;
-  color: #000;
-  border-left: 2px solid #aaa;
-  padding-left: 12px;
-  margin-top: 24px;
-  margin-bottom: 24px;  
-}
 
 
 #tab-content-assets-button-holder {
@@ -318,6 +302,27 @@ h2, h3 {
   margin-top: 48px;
 }
 
+.plugin-view-entry {
+  border-bottom: 1px solid #CCC;
+  line-height: 16px;
+}
+
+
+.plugin-long-view {
+  font-size: 12px;
+  color: #333;
+}
+
+.plugin-documentation-box {
+  font-size: 14px;
+  color: #000;
+  border-left: 2px solid #aaa;
+  padding-left: 12px;
+  margin-top: 24px;
+  margin-bottom: 24px;  
+}
+
+
 .plugin-code-view {
   width: 100%;
   height: 200px;
@@ -326,12 +331,13 @@ h2, h3 {
 }
 
 .plugin-short-info {
-  color: #22556f;
   border: 0px solid #22556f;
   border-left: 0px;
   border-right: 0px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-left: 0px;
+  padding-right: 20px;
+}
+
+.plugin-version-info {
+  font-size: 11px;
 }
