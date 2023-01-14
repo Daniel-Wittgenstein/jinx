@@ -1,0 +1,20 @@
+{
+  "isPlugin": true,
+  "appName": "jinx",
+  "compatiblewithVersions": ["0.1"],
+  "name": "Simple Interface Demo",
+  "id": "simpleInterfaceDemo",
+  "author": "Jinx Core Team",
+  "copyrightInfo": ":(c) 2023 Jinx Core Team",
+  "version": "0.0.1",
+  "licenseShort": "Public Domain",
+  "links": [],
+  "licenseText": "I release this into the public domain.",
+  "shortInfo": "Simple Interface Demo plugin.",
+  "documentation": "",
+  "builtIn": true,
+  "enabledByDefault": false,
+  "logo": "D",
+  "licenseTextMustBeIncludedInFinalGame": false,
+  "bundlerOutputFileName": "simpleinterfacedemo"
+}
