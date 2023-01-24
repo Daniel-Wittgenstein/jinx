@@ -1,4 +1,5 @@
 ;(function() {
+
   const pluginName = "plugin simpleInterface"
   const domPrefix = "X-simple-interface-plugin-"
 
@@ -29,7 +30,6 @@
     const eraseEl = document.getElementById(`\${domPrefix}erase`)
     eraseEl.addEventListener("click", clickErase)
   }
-  
 
   function clickLoad() {
     const state = localStorage.getItem("basicSaveState")

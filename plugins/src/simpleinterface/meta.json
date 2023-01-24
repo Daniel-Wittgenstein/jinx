@@ -16,5 +16,5 @@
   "enabledByDefault": false,
   "logo": "D",
   "licenseTextMustBeIncludedInFinalGame": false,
-  "bundlerOutputFileName": "simpleinterfacedemo"
+  "bundlerOutputFileName": "simpleinterface"
 }
