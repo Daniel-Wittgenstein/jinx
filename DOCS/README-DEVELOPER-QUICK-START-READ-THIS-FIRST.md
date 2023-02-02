@@ -1,5 +1,6 @@
 
-+ The build process involves .sh scripts, so it only runs on Linux, currently.
+
+QUICK START:
 
 + Just do this:
 
@@ -11,8 +12,7 @@
 
   It will watch the runtime files and all plugin files.
   Once it detects a file change, it will automatically rebuild stuff
-  (runtime or plugin, as appropriate; it does NOT rebuild everything on every change
-  which is good).
+  (runtime or plugin, as appropriate).
 
   That's basically everything you need to start developing.
 
@@ -20,8 +20,7 @@
 
 Further notes:
 
-  + The editor files doesn't even need a build step. Just get hacking.
+  + The editor files don't even need a build step. Just get hacking.
 
-  + "node ./bruhwatcher.js"
-  This is the old watcher. It only builds the runtime, not the plugins, and is obsolete.
-  bruh over watcher supersedes it.
+  + This should be platform-independent now, since it uses only node, no more Linux shell scripts.
+
