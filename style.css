@@ -309,6 +309,25 @@ h2, h3 {
   line-height: 16px;
 }
 
+.plugin-logo {
+  width: 32px;
+  height: 32px;
+  filter: invert(42%) sepia(41%) saturate(2896%) hue-rotate(164deg) brightness(99%) contrast(103%);
+  border: 1px solid #CCC;
+  border-radius: 50%;
+  margin-right: 24px;
+}
+
+.plugin-logo-letter {
+  border: 0px solid #CCC;
+  border-radius: 8px;
+  margin-right: 24px;
+  background: #777;
+  color: #EEE;
+  padding: 6px;
+  text-align: center;
+  user-select: none;
+}
 
 .plugin-long-view {
   font-size: 12px;

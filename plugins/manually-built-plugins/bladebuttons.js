@@ -29,7 +29,7 @@ $_PLUGIN.add({
   builtIn: true,
   enabledByDefault: true,
   //********* optional properties:
-  logo: `🗡️`,
+  logo: ``,
   licenseTextMustBeIncludedInFinalGame: false,
   //********* custom properties (no special meaning;
   //    they are just displayed in the "view plugin" view):

@@ -287,27 +287,33 @@
         size = getApproximateByteSize(plugin.implementation.js)
       }
       i++
-      const id = Math.random() + "/" + Math.random()
+      let logoImg = ""
+      if (plugin.logo) {
+        logoImg = plugin.logo.replace("<svg ", `<svg class="plugin-logo"`)
+      } else {
+        logoImg = `<span class="plugin-logo-letter">${plugin.name[0]}</span>`
+      }
       let checki = ""
       if (pluginsEnabled[i]) checki = "checked"
       const deleteButton = !plugin.builtIn ?
         `<button onclick='window.deletePlugin(${i})'>delete</button>` : ""
+      const logoholderId = (Math.random() + "-" + Math.random()).replace(".", "")
       out += `
-      <div class="plugin-view-entry">
-        <p>
-          ${plugin.logo || ""} ${plugin.name} by ${plugin.author}
-        </p>
-        <p>
-          <span class = "plugin-short-info">${plugin.shortInfo}</span>
-          <span class = "plugin-version-info">version: ${plugin.version} / size: ${size}</span>
-          <br><br>
-        enabled: <input type="checkbox"
-          onchange="window.clickPluginCheckbox(${i})" ${checki}>
-        <button onclick="window.viewPluginInPopup(${i})" style="margin-left: 16px;">view</button>
-        ${deleteButton}
-        </p>
-      </div>
-      `
+        <div class="plugin-view-entry">
+          <p>
+            ${logoImg} ${plugin.name} by ${plugin.author}
+          </p>
+          <p>
+            <span class = "plugin-short-info">${plugin.shortInfo}</span>
+            <span class = "plugin-version-info">version: ${plugin.version} / size: ${size}</span>
+            <br><br>
+          enabled: <input type="checkbox"
+            onchange="window.clickPluginCheckbox(${i})" ${checki}>
+          <button onclick="window.viewPluginInPopup(${i})" style="margin-left: 16px;">view</button>
+          ${deleteButton}
+          </p>
+        </div>
+        `
     }
     el.innerHTML = out
   }
