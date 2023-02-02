@@ -126,8 +126,8 @@
     },
 
     createEffect: (type, func, order = 0) => {
-      const allowed = ["after", "before", "onVariableChange", "set", "get",
-        "loadApp", "paragraphText", "choiceText", "allText", "beforeTextRender"]
+      const allowed = ["after", "before", "final", "beforeTextRender", "onVariableChange", "set", "get",
+        "loadApp", "paragraphText", "choiceText", "allText"]
       if (!type) {
         throw new Error(`createEffect: no parameters passed to function?`)
       }
@@ -413,6 +413,13 @@
 
 
   function jinxFinishedRunning() {
+
+    function runFinalEffects() {
+      for (let effect of registeredEffects.final) {
+        effect.func()
+      }
+    }
+
     function runAfterEffects() {
       let divert = false
       for (let effect of registeredEffects.after) {
@@ -465,6 +472,9 @@
 
     //now render the containers:
     renderAllContainers()
+
+    //now run final effects:
+    runFinalEffects()
 
   }
 
