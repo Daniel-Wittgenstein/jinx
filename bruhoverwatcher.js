@@ -48,14 +48,31 @@ function getDirectories(path) {
 
 console.log("Bruh OVER Watcher is watching ... watching RUNTIME *and* PLUGINS")
 
-registerWatcher( "./runtime", buildRuntime )
+registerWatcher( "./runtime", () => {
+  buildRuntime()
+  customRun()
+})
 
 const dirList = getDirectories("./plugins/src")
 //watch every folder in the plugins/src folder (file watcher does NOT automatically do recursion):
 for (const dir of dirList) {
-  registerWatcher("./plugins/src/" + dir, buildPlugins)
+  registerWatcher("./plugins/src/" + dir, () => {
+    buildPlugins()
+    customRun()
+  })
 }
 
+
+registerWatcher("./", () => {
+  customRun()
+})
+
+
+  //
+
+function customRun() {
+  cp.exec("refresh-chrome.ahk")
+}
 
 
 //"./bruhbuild.sh" "./plugin-build.sh"
@@ -78,6 +95,8 @@ function buildRuntime() {
   const instrs = instrPreProc(runtimeBuildInstructions)
   execInstrs(instrs)
 }
+
+
 
 
 function buildPlugins() {

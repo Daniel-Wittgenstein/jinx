@@ -1,4 +1,4 @@
-
+    
 ;(function() {
   const DEBUG = {
     showDebugTab: false,

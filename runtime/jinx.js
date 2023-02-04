@@ -1,5 +1,5 @@
 
-
+                        
 /*
 todo:
 + once-only choices
@@ -15,7 +15,7 @@ done:
 notes:
 + inline choices and each turn functionality are things the runner can provide.
 + they are not done by jinx
-
+ 
 
 */
 
