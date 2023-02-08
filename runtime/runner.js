@@ -415,6 +415,7 @@
   function jinxFinishedRunning() {
 
     function runFinalEffects() {
+      if (!registeredEffects.final) return
       for (let effect of registeredEffects.final) {
         effect.func()
       }

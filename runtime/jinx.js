@@ -1,4 +1,4 @@
-
+ 
                         
 /*
 todo:
@@ -7,7 +7,7 @@ todo:
 and a js function to go to paragraph or label
 that can be called WHILE JINX IS RUNNING! -> provided by jinx for any runner to use
 + runner api stuff
-
+   
 done:
 + <<>> text replacements work for choices, too
 + if conditions for choices (on same line)
@@ -18,7 +18,7 @@ notes:
  
 
 */
-
+  
 jinx = (function() {
 
   function createNewStory(... args) {

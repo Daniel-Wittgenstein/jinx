@@ -6,11 +6,11 @@ QUICK START:
 
   from the top-level directory, run:
 
-  "node ./bruhoverwatcher.js"
+  "node ./sauron.js"
 
   Let this node process run in the background while you develop.
 
-  It will watch the runtime files and all plugin files.
+  It will watch the runtime files, all plugin files and the editor files in the top-level directory.
   Once it detects a file change, it will automatically rebuild stuff
   (runtime or plugin, as appropriate).
 
@@ -20,7 +20,7 @@ QUICK START:
 
 + Windows / AutoHotkey
   As an additional bonus, if you are on Windows,
-  the "bruhoverwatcher.js" node script will also refocus Chrome and refresh the browser window
+  the "sauron.js" node script will also refocus Chrome and refresh the browser window
   on any change in any of these directories:
     -   ./ (toplevel directory)
     -   all plugins sub-directories
@@ -33,5 +33,7 @@ Further notes:
 
   + The editor files don't even need a build step. Just get hacking.
 
-  + The build-step is platform-independent. Only some optional utilities for simpler developing are platform-specific. 
+  + The build-step is platform-independent. Only some optional utilities for simpler developing are platform-specific (Autohotkey). 
+
+  + No more dependency on Go for build step.
 

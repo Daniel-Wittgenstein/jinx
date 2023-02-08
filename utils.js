@@ -1,3 +1,15 @@
+/*
+
+  About utils.js:
+
+  This is shared by both the editor and the runtime (meaning it is injected
+    into every exported story)!
+
+  Functions that are needed by both the editor and the runtime should go here,
+  so they don't need to be duplicated.
+
+*/
+
 
 const utils = {
 
