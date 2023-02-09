@@ -1223,7 +1223,7 @@ jinx = (function() {
           error: true,
           lineNr: line.lineNr,
           lineObj: line,
-          msg: `${line.name}': duplicate knot/label name`,
+          msg: `${line.name}: duplicate knot/label name`,
         }
         jumpTable[line.name] = index
       } else if (line.type === "goto") {

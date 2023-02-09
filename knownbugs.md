@@ -12,6 +12,9 @@ for it to refresh. instead it should do that automatically (for both codemirrors
 we want to allow empty choices as fallback. probably not. so issue an error
 if choice is empty, instead)
 
++ a line ".g" will give an error, but an incorrect error: there is no label g.
+  this should be paarsed as goto command without label target. same for ".goto"
+
 + ...
 
 
