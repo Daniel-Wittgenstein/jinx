@@ -462,7 +462,10 @@
   }
 
 
-  let IS_FULLSCREEN = false
+
+  function appIsFullScreen() {
+    return document.fullscreenElement !== null
+  }
 
   function start() {
 
@@ -477,18 +480,16 @@
     initAddAssetsButton()
 
     document.getElementById("play-tools-button-fullscreen")
-      .addEventListener("click", (e) => {
-      if (IS_FULLSCREEN) {
-        IS_FULLSCREEN = false
+        .addEventListener("click", (e) => {
+      if ( appIsFullScreen() ) {
         document.exitFullscreen()
       } else {
-        IS_FULLSCREEN = true
         document.getElementById("tab-content-play").requestFullscreen()
       }
     })
     
     document.getElementById("code-fullscreen-button")
-      .addEventListener("click", (e) => {
+        .addEventListener("click", (e) => {
       document.getElementById("code").requestFullscreen()
     })
 
