@@ -362,3 +362,21 @@ h2, h3 {
 .plugin-version-info {
   font-size: 11px;
 }
+
+
+#tab-content-meta {
+  background: #FFF;
+  color: #222;
+  padding: 10px;
+  overflow: auto;
+  height: calc(100vh - var(--assets-tools-bar-height)
+    - var(--mid-padding) - var(--mid-padding) - var(--top-bar-height) ) !important;
+}
+
+.story-meta-item {
+  margin-bottom: 12px;
+}
+
+.story-meta-info-text {
+  font-size: 10px;
+}

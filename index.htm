@@ -63,6 +63,7 @@
         <div class="tab tab-left" id="tab-html" onclick="selectTab('html', 0)">HTML</div>
         <div class="tab tab-left" id="tab-assets" onclick="selectTab('assets', 0)">Assets</div>
         <div class="tab tab-left" id="tab-plugins" onclick="selectTab('plugins', 0)">Plugins</div>
+        <div class="tab tab-left" id="tab-meta" onclick="selectTab('meta', 0)">Meta</div>
       </div>
       <div class="tab-bar" id="tab-bar">
         <div class="tab tab-right tab-chosen" id="tab-play" onclick="selectTab('play', 1)">Play</div>
@@ -83,6 +84,8 @@
         </div>
         <div class="tab-content-left" id="tab-content-plugins">
         </div>
+        <div class="tab-content-left" id="tab-content-meta">
+        </div>
       </div>
 
       <div class="play mids">
@@ -98,6 +101,7 @@
         <div class="tab-content-right" id="tab-content-debug"></div>
       </div>
       <div class="bottom bar">
+        <button class="bar-button" id="new-button">New</button>
         <button class="bar-button" id="load-button">Open</button>
         <button class="bar-button" id="save-button">Save</button>
         <button class="bar-button" id="export-button">Export</button>
@@ -106,6 +110,7 @@
         <div id="example-selector"></div>
       </div>
     </div>
+
 
     <script src="runtime/jinx.js"></script> <!-- We need this only for debugging purposes. -->
 

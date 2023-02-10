@@ -47,12 +47,17 @@
     }
     //codeMirror.setValue(v.story)
     //codeMirrorHtml.setValue(v.html)
+    console.log("retrieved story data", JSON.parse(savData))
     setStoryData(v) 
   }
 
   function saveSession() {
     const savData = getStoryData()
     localStorage.setItem( localStorageKey, JSON.stringify(savData) )
+  }
+
+  function resetPluginsData() {
+    $_PLUGIN.resetState()
   }
 
   function getPluginsData() {
@@ -79,6 +84,7 @@
       html: codeMirrorHtml.getValue(),
       assets: getAssetsData(),
       plugins: getPluginsData(),
+      meta: getProjectMetaData(),
       appStorySaveState: true,
     }
   }
@@ -88,12 +94,18 @@
     codeMirrorHtml.setValue(state.html)
     setAssetsData(state.assets)
     setPluginsData(state.plugins)
+    setProjectMetaData(state.meta)
     updateAssetsView()
     updatePluginView()
+    updateMetaView()
   }
 
-  let assetsData = {
-    assets: {},
+  let assetsData
+
+  function resetAssetsData() {
+    assetsData = {
+      assets: {},
+    }
   }
 
   function getAssetsData() {
@@ -170,7 +182,6 @@
         }
       }
     }
-
 
     if (plugin.implementation.js) {
       out += `JS:<br><textarea readonly spellcheck="false"
@@ -467,6 +478,7 @@
     return document.fullscreenElement !== null
   }
 
+
   function start() {
 
     if (DEBUG.showDebugTab) {
@@ -511,7 +523,7 @@
     codeMirror.on("change", onEditorChange)
     
     codeMirrorHtml = CodeMirror(document.getElementById("tab-content-html"), {
-      value: window.runTimeData.index.Contents,
+      value: "",
       mode:  "htmlmixed",
       indentUnit: 2,
       tabSize: 2,
@@ -532,7 +544,11 @@
     })
 
     codeMirrorHtml.on("change", onEditorChange)
-    
+  
+    createNewProject()
+
+    codeMirrorHtml.setValue(window.runTimeData.index.Contents)
+
     const savData = localStorage.getItem(localStorageKey)
     if (savData) {
       loadSession(savData)
@@ -541,6 +557,7 @@
     $("#play-tools-button-restart").on("click", injectStoryIntoIframe)
 
 
+    $("#new-button").on("click", clickNew)
     $("#load-button").on("click", clickLoad)
     $("#save-button").on("click", clickSave)
     $("#export-button").on("click", clickExport)
@@ -549,13 +566,15 @@
 
     updateAssetsView()
     updatePluginView()
+    updateMetaView()
 
     selectTab("story", 0)
     selectTab("play", 1)
     
     
             //selectTab("assets", 0) //testing
-            selectTab("plugins", 0) //testing
+            //selectTab("plugins", 0) //testing
+            selectTab("meta", 0) //testing
 
     //showRunResults()
     //showPlayBox()
@@ -563,6 +582,231 @@
 
   }
 
+  function clickNew() {
+    function yesDoIt() {
+      createNewProject()
+      updateAssetsView()
+      updatePluginView()
+      updateMetaView()
+      saveSession()
+    }
+    confirma(`Do you really want to create a new project?` +
+      `THIS WILL ERASE THE CURRENT PROJECT. Save a copy of the current project to your device before you do this.`,
+      "Yes, create a new project", yesDoIt,
+      "Cancel", () => {},
+    )
+  }
+
+  function createNewProject() {
+    resetPluginsData()
+    resetAssetsData()
+    resetProjectMetaData()
+    codeMirror.setValue("")
+    codeMirrorHtml.setValue("")
+  }
+
+  let projectMetaData
+  
+  function resetProjectMetaData() {
+    projectMetaData = {
+      userSetValues: [],
+      ifid: generateRandomUUID(),
+    }
+    let i = -1
+    for (let item of storyMetaTemplate) {
+      i++
+      projectMetaData.userSetValues[i] = item.default || ""
+    }
+  }
+
+  function setProjectMetaData(data) {
+    projectMetaData = data
+  }
+
+  function getProjectMetaData() {
+    return projectMetaData
+  }
+
+
+
+  const storyMetaTemplate = [
+    {
+      label: "author(s)",
+      target: `<meta name="author" content="$content">`,
+    },
+    {
+      label: "title",
+      info: "Your work's title.",
+      default: "an unnamed project",
+      target: `<meta name="title" content="$content">\n    <meta property="og:title" content="$content">`,
+    },
+    {
+      label: "subtitle",
+      infos: `Your work's subtitle. Leave empty if there is no subtitle.`,
+      target: `<meta name="subtitle" content="$content">`,
+    },
+    {
+      label: "browser title",
+      info: "The page title that will be displayed in the browser window.",
+      target: `<title>$content</title>`,
+    },
+    {
+      label: "date published",
+      info: "Use the format Day/Month/Year.",
+      target: `<meta name="date published" content="$content">`,
+    },
+    {
+      label: "genre(s)",
+      info: "(comma-separated)",
+      target: `<meta name="genres" content="$content">`,
+    },
+    {
+      label: "for adult audiences only",
+      info: `(yes / no / unspecified)`,
+      target: `<meta name="adult" content="$content">`,
+      default: "unspecified",
+      validator: (n) => {
+        n = n.trim().toLowerCase()
+        if (n === "yes" || n === "no" || n === "unspecified") {
+          return {ok: true, content: n}
+        }
+        return {ok: false, message: "Value must be yes, no or unspecified."}
+      }
+    },
+    {
+      label: "trigger warnings",
+      info: `(comma-separated)`,
+      target: `<meta name="trigger warnings" content="$content">`,
+    },
+    {
+      label: "copyright / license information",
+      target: `<meta name="copyright" content="$content">`,
+    },
+    {
+      label: "language",
+      target: `<meta name="language" content="$content">`,
+      default: "English",
+    },
+    {
+      label: "version",
+      target: `<meta name="version" content="$content">`,
+    },
+    {
+      label: 'draft',
+      info: `Should be "yes" if this is just a draft. Should be "no" if this work is finished.`,
+      target: `<meta name="draft" content="$content">`,
+      default: "no",
+    },
+    {
+      label: 'short description',
+      info: `Max. 1600 characters.`,
+      target: `<meta name="description" content="$content">`,
+      validator: (n) => {
+        if (n.length > 1600) return {
+          ok: false,
+          message: "Text is too long."
+        }
+        return {
+          ok: true,
+          content: n,
+        }
+      }
+    },
+  ] 
+
+  function generateRandomUUID() {
+    return crypto.randomUUID()
+  }
+
+  function getHtmlMetaData() {
+    function escapeHtml(n) {
+      //escaping quotes and apostrophes is important
+      //here, because the content could go into attribute.
+      //escaping < > and & is important because of title tag content.
+      return n
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&apos;")
+        .replaceAll("\n", " ")
+    }
+    let index = -1
+    const metaData = []
+    for (const template of storyMetaTemplate) {
+      index++
+      let val = projectMetaData.userSetValues[index]
+      if (!val && val !== 0) val = ""
+      let target = template.target
+      val = escapeHtml(val)
+      target = target.replaceAll("$content", val)
+      metaData.push(target)
+    }
+    let out = "\n"
+    for (let item of metaData) {
+      out += "    " + item + "\n"
+    }
+    out += `\n    <meta name="creator" content="${appMetaData.appIdentifierName + " " + appMetaData.version}">`
+    out += `\n    <meta property="ifiction:ifid" content="${projectMetaData.ifid}">`
+    return out
+  }
+
+
+  function updateMetaView() {
+    const el = $("#tab-content-meta")
+    let out = ""
+    let i = -1
+    for (let item of storyMetaTemplate) {
+      i++
+      const theContent = projectMetaData.userSetValues[i]
+      const id = "input-" + ( + new Date() ) + "-" + (Math.random() + "").replace(".", "")
+      out += `
+        <div class="story-meta-item">
+          <div>
+            ${item.label}:
+            <input type="text" id="${id}" spellcheck="false" value = "${theContent}" />
+          </div>
+          <div class="story-meta-info-text">
+            ${item.info || ''}
+          </div>
+        </div>
+      `
+      let xx = i
+      $(document).on("change", "#" + id, () => {
+        const el = $("#" + id)
+        let n = el.val()
+        if (item.validator) {
+          const result = item.validator(n)
+          if (result.ok) {
+            n = result.content
+          } else {
+            alerta(result.message)
+          }
+        }
+        projectMetaData.userSetValues[xx] = n
+        saveSession()
+      })
+    }
+    el.html(out)
+    const ifidLabel = $(`<p>IFID: ${projectMetaData.ifid}</p>`)
+    const ifidButton = $(`<button>Generate a new IFID</button>`)
+    el.append(ifidLabel)
+    el.append("&nbsp;")
+    el.append(ifidButton)
+    const yesDoIt = () => {
+      projectMetaData.ifid = generateRandomUUID()
+      updateMetaView()
+      saveSession()
+    }
+    ifidButton.on("click", () => {
+      confirma(`This action is usually only necessary if you developed a project ` +
+      `into two distinct projects and want to publish them separately now. If that 
+      is not the case, you probably do not need to perform this action.`,
+      "Yes, get a new IFID now!", yesDoIt,
+      "Cancel", () => {},
+      )
+    })
+  }
 
   function initAddAssetsButton() {
     $("#asset-file-input").on("change", function(e) {
@@ -869,7 +1113,7 @@
     v = `;window.$__RUNTIME_MODE = "${mode}";storyData = ` + JSON.stringify(v)
     const htmlContent = codeMirrorHtml.getValue()
     const plugins = window.$_PLUGIN.getAll()
-    let html = createHtmlTemplate(htmlContent, v, plugins, pluginsEnabled)
+    let html = createHtmlTemplate(htmlContent, v, plugins, pluginsEnabled, getHtmlMetaData() )
     return html
   }
 

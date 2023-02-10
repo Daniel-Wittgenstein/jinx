@@ -1,7 +1,7 @@
 
 window.runTimeData = {}
 
-function createHtmlTemplate(html, storyData, plugins, pluginsEnabled) {
+function createHtmlTemplate(html, storyData, plugins, pluginsEnabled, metaData) {
   const data = window.runTimeData
   let pJs = ""
   let pCss = ""
@@ -39,6 +39,7 @@ function createHtmlTemplate(html, storyData, plugins, pluginsEnabled) {
   }
 
   html = html
+    .replace("§meta", metaData)
     .replace("§style", data.style.Contents)
     .replace("§pluginCss", pCss)
     .replace("§jinx", data.jinx.Contents + "\n;\n\n" + data.utils.Contents)

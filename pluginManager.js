@@ -2,7 +2,12 @@
 
 window.$_PLUGIN = (function() {
 
-  let plugins = []
+  let plugins
+  resetState()
+
+  function resetState() {
+    plugins = []
+  }
 
   function add(plugin) {
     plugins.push(plugin)
@@ -20,5 +25,6 @@ window.$_PLUGIN = (function() {
     add,
     getAll,
     deletePlugin,
+    resetState,
   }
 })()

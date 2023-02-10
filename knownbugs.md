@@ -18,7 +18,13 @@ if choice is empty, instead)
 + ...
 
 
-
 + this is not a bug, but: some tests use a custom-created window.v instead
   of window._test. They should be changed to use window._test.
   otherwise cross-pollution between tests (is real! has been seen!)
+
+
+  NOTES:
+  
++ if you export a chrome story that throws an error, chrome also breaks the document title.
+  firefox does not. this is not our bug. it's just something to keep in mind. the title tag
+  is not broken. fix the story, re-export it and the document title should show just fine.
