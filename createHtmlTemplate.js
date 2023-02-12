@@ -8,7 +8,7 @@ function createHtmlTemplate(html, storyData, plugins, pluginsEnabled, metaData) 
   let i = -1
   for (let plugin of plugins) {
     i++
-    if (!pluginsEnabled[i]) continue
+    if (!pluginsEnabled[plugin.id]) continue
     if (plugin.implementation) {
 
       if (plugin.implementation.js) {

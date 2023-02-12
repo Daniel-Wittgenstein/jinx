@@ -10,6 +10,12 @@ window.$_PLUGIN = (function() {
   }
 
   function add(plugin) {
+    const newPluginId = plugin.id
+    for (let plugin of plugins) {
+      if (plugin.id === newPluginId) {
+        return //has already been added
+      }
+    }
     plugins.push(plugin)
   }
 

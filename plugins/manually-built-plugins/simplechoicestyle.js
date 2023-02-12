@@ -22,7 +22,7 @@ $_PLUGIN.add({
   isPlugin: true,
   appName: "jinx",
   compatiblewithVersions: ["0.1"],
-  name: `Simple Choice Style`,
+  name: `Choice Style - Simple`,
   id: "simpleChoiceStyle",
   author: `Jinx Core Team`,
   copyrightInfo: `(c) 2022 Jinx Core Team`,

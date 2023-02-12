@@ -23,7 +23,7 @@
       //this amount of time has to pass until the story is re-translated.
   }
 
-  let pluginsEnabled = []
+  let pluginsEnabled = {}
 
   const temp = {
     lastTranslation: 0,
@@ -196,8 +196,8 @@
     return `<div class="plugin-long-view">${out}</div>`
   }
 
-  window.clickPluginCheckbox = (i) => {
-    pluginsEnabled[i] = !pluginsEnabled[i]
+  window.clickPluginCheckbox = (pluginId) => {
+    pluginsEnabled[pluginId] = !pluginsEnabled[pluginId]
     saveSession()
     translate({noTimeCheck: true})
   }
@@ -292,7 +292,12 @@
     <div style="width: 100%; height: 1px; background: #ccc; margin-top: 12px"></div>`
     const plugins = $_PLUGIN.getAll()
     let i = -1
-    for (let plugin of plugins) {
+    const sortedPlugins = plugins.sort( (a, b) => {
+      if (a.name > b.name) return 1
+      if (a.name < b.name) return -1
+      return 0
+    })
+    for (let plugin of sortedPlugins) {
       let size = "?"
       if (plugin.implementation.js) {
         size = getApproximateByteSize(plugin.implementation.js)
@@ -305,7 +310,7 @@
         logoImg = `<span class="plugin-logo-letter">${plugin.name[0]}</span>`
       }
       let checki = ""
-      if (pluginsEnabled[i]) checki = "checked"
+      if (pluginsEnabled[plugin.id]) checki = "checked"
       const deleteButton = !plugin.builtIn ?
         `<button onclick='window.deletePlugin(${i})'>delete</button>` : ""
       const logoholderId = (Math.random() + "-" + Math.random()).replace(".", "")
@@ -319,7 +324,7 @@
             <span class = "plugin-version-info">version: ${plugin.version} / size: ${size}</span>
             <br><br>
           enabled: <input type="checkbox"
-            onchange="window.clickPluginCheckbox(${i})" ${checki}>
+            onchange="window.clickPluginCheckbox('${plugin.id}')" ${checki}>
           <button onclick="window.viewPluginInPopup(${i})" style="margin-left: 16px;">view</button>
           ${deleteButton}
           </p>
@@ -552,6 +557,7 @@
     const savData = localStorage.getItem(localStorageKey)
     if (savData) {
       loadSession(savData)
+      console.log(pluginsEnabled)
     }
 
     $("#play-tools-button-restart").on("click", injectStoryIntoIframe)
@@ -573,8 +579,8 @@
     
     
             //selectTab("assets", 0) //testing
-            //selectTab("plugins", 0) //testing
-            selectTab("meta", 0) //testing
+            selectTab("plugins", 0) //testing
+            //selectTab("meta", 0) //testing
 
     //showRunResults()
     //showPlayBox()
@@ -598,7 +604,6 @@
   }
 
   function createNewProject() {
-    resetPluginsData()
     resetAssetsData()
     resetProjectMetaData()
     codeMirror.setValue("")

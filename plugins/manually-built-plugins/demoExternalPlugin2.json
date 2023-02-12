@@ -1,12 +1,12 @@
 {
   "implementation":{
-     "js":"console.log('Demo Plugin 1 works!')"
+     "js":"console.log('Demo Plugin 2 works!')"
   },
   "isPlugin":true,
   "appName":"jinx",
   "compatiblewithVersions": ["0.1"],
-  "name":"Demo Plugin 1",
-  "id":"demoPlugin",
+  "name":"Demo Plugin 2",
+  "id":"demoPlugin2",
   "author":"Jinx Core Team",
   "copyrightInfo":"(c) 2022 Jinx Core Team",
   "version":"0.0.1",
