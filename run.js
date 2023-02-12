@@ -317,7 +317,7 @@
       out += `
         <div class="plugin-view-entry">
           <p>
-            ${logoImg} ${plugin.name} by ${plugin.author}
+            ${logoImg} <b>${plugin.name}</b> by ${plugin.author}
           </p>
           <p>
             <span class = "plugin-short-info">${plugin.shortInfo}</span>

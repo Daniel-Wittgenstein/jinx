@@ -319,14 +319,15 @@ h2, h3 {
 }
 
 .plugin-logo-letter {
-  border: 0px solid #CCC;
-  border-radius: 8px;
-  margin-right: 24px;
-  background: #777;
-  color: #EEE;
+  border: 1px solid #0BB7FF;
+  border-radius: 4px;
+  margin-right: 32px;
+  background: rgba(0,0,0,0);
+  color: #0BB7FF;
   padding: 6px;
   text-align: center;
   user-select: none;
+  font-weight: bold;
 }
 
 .plugin-long-view {
