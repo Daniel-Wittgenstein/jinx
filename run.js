@@ -670,7 +670,7 @@
         if (n === "yes" || n === "no" || n === "unspecified") {
           return {ok: true, content: n}
         }
-        return {ok: false, message: "Value must be yes, no or unspecified."}
+        return {ok: false, message: "Value should be yes, no or unspecified."}
       }
     },
     {
@@ -692,12 +692,6 @@
       target: `<meta name="version" content="$content">`,
     },
     {
-      label: 'draft',
-      info: `Should be "yes" if this is just a draft. Should be "no" if this work is finished.`,
-      target: `<meta name="draft" content="$content">`,
-      default: "no",
-    },
-    {
       label: 'short description',
       info: `Max. 1600 characters.`,
       target: `<meta name="description" content="$content">`,
@@ -712,6 +706,7 @@
         }
       }
     },
+
   ] 
 
   function generateRandomUUID() {
@@ -724,9 +719,9 @@
       //here, because the content could go into attribute.
       //escaping < > and & is important because of title tag content.
       return n
+        .replaceAll("&", "&amp;") //must be first replacement!
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
-        .replaceAll("&", "&amp;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&apos;")
         .replaceAll("\n", " ")
@@ -756,15 +751,17 @@
     const el = $("#tab-content-meta")
     let out = ""
     let i = -1
+    let inputDomIdsToContent = []
     for (let item of storyMetaTemplate) {
       i++
       const theContent = projectMetaData.userSetValues[i]
       const id = "input-" + ( + new Date() ) + "-" + (Math.random() + "").replace(".", "")
+      inputDomIdsToContent.push({id, content: theContent})
       out += `
         <div class="story-meta-item">
           <div>
             ${item.label}:
-            <input type="text" id="${id}" spellcheck="false" value = "${theContent}" />
+            <input type="text" id="${id}" spellcheck="false" value = "" />
           </div>
           <div class="story-meta-info-text">
             ${item.info || ''}
@@ -788,6 +785,9 @@
       })
     }
     el.html(out)
+    for (let item of inputDomIdsToContent) {
+      $("#" + item.id).val(item.content)
+    }
     const ifidLabel = $(`<p>IFID: ${projectMetaData.ifid}</p>`)
     const ifidButton = $(`<button>Generate a new IFID</button>`)
     el.append(ifidLabel)
@@ -799,7 +799,7 @@
       saveSession()
     }
     ifidButton.on("click", () => {
-      confirma(`This action is usually only necessary if you developed a project ` +
+      confirma(`This action is usually only necessary if you have developed an initial project ` +
       `into two distinct projects and want to publish them separately now. If that 
       is not the case, you probably do not need to perform this action.`,
       "Yes, get a new IFID now!", yesDoIt,
