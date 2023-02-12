@@ -1,11 +1,31 @@
 ;(function() {
 
+  /* 
+    User Interface options:
+    simpleInterface.maxUndoStates(5) //set maximum undo to 5 turns
+
+  */
+
+  const userInterface = {
+    setMaxUndo(num) {
+      if (  !utils.isInteger(num) ) {
+        throw new Error(`setMaxUndo expects an integer number`)
+      }
+      if (  num < 0 ) {
+        throw new Error(`setMaxUndo must be at least 0`)
+      }
+      maxUndoStates = num
+    }
+  }
+  window.simpleInterface = userInterface
+
   const pluginName = "plugin simpleInterface"
   const domPrefix = "X-simple-interface-plugin-"
 
   jin.createEffect("loadApp", initStuff, 20)
 
-  const undoStates = []
+  let undoStates = []
+  let maxUndoStates = 7 //7 is default setting
 
   function initStuff() {
 
@@ -36,25 +56,43 @@
     const eraseEl = document.getElementById(`\${domPrefix}erase`)
     eraseEl.addEventListener("click", clickErase)
 
-    jin.createEffect ("final", () => {
+    jin.createEffect ("initTurn", () => {
       const undoState = JSON.parse( JSON.stringify( jin.getState() ) )
       undoStates.push(undoState)
-      console.log("huh", undoState.outputContainers.main.content.choices)
-    }, Infinity)
+      if (undoStates.length > maxUndoStates) {
+        undoStates.shift()
+      }
+    }, -100_000)
 
   }
 
 
+  function logUndoStack() {
+    console.log(`####### CURRENT UNDO STACK ENTRIES: #######`)
+    let index = -1
+    for (let s of undoStates) {
+      index++
+      const c = s.outputContainers.main.content
+      let out = ""
+      out += c.paragraphs.reduce(
+        (total, par) => {return total += par.text + "      "},
+        "")
+      out += c.choices.reduce(
+        (total, choice) => {return total += "+ " + choice.text + "      "},
+        "")
+      console.log(index, out)
+    }
+    console.log("### undo stack end ###")
+
+  } 
+
   function clickUndo() {
-    if (undoStates.length <= 1) {
+    if (undoStates.length < 1) {
       alert("nothing to undo")
       return
     }
-    undoStates.pop()
-    const state = undoStates[undoStates.length - 1]
-    console.log("setting state", state, state.outputContainers.main.content.choices, undoStates)
+    const state = undoStates.pop()
     jin.setState(state)
-
   }
 
 
@@ -66,6 +104,8 @@
     }
     const stateParsed = JSON.parse(state)
     jin.setState(stateParsed)
+    undoStates = []
+
   }
 
   function clickSave() {

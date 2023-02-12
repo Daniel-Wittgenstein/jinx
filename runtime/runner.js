@@ -18,6 +18,8 @@
     allText: [],
     before: [],
     after: [],
+    final: [], //runs after after-effects
+    initTurn: [], //runs before before-effects. before old rendered content is removed
     onVariableChange: [],
     set: [],
     get: [],
@@ -126,7 +128,7 @@
     },
 
     createEffect: (type, func, order = 0) => {
-      const allowed = ["after", "before", "final", "beforeTextRender", "onVariableChange", "set", "get",
+      const allowed = ["after", "before", "final", "initTurn", "beforeTextRender", "onVariableChange", "set", "get",
         "loadApp", "paragraphText", "choiceText", "allText"]
       if (!type) {
         throw new Error(`createEffect: no parameters passed to function?`)
@@ -251,6 +253,12 @@
     or:
       {type: "programmaticTrigger", target: "knotOrLabelName"}
     */
+    function runInitTurnEffects() {
+      for (let effect of registeredEffects.initTurn) {
+        effect.func()
+      }
+    }
+
     function runBeforeEffects() {
       let divert = false
       for (let effect of registeredEffects.before) {
@@ -286,6 +294,8 @@
       }
       return result
     }
+
+    runInitTurnEffects()
 
     outputContainersMoveOldContentIntoOldBuffer()
 
@@ -405,7 +415,7 @@
 
 
   function onStoryEvent(type) {
-    console.log("JINX EVENT TRIGGERED:", type)
+    //console.log("JINX EVENT TRIGGERED:", type)
     if (type === "finishedCollecting" || type === "gameEnd") {
       jinxFinishedRunning()
     }
