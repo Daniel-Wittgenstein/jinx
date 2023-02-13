@@ -1,8 +1,468 @@
 window.HELP_CONTENTS = `
   
-<h2>Quick Guide</h2>
+<h2>Jinx Guide</h2>
 
-<h3>Basics</h3>
+<h3>Intro</h3>
+
+  <p>
+
+  Jinx is a free and open-source tool for creating text-based games
+  and interactive stories.
+
+  Jinx games are created and played in the browser.
+
+  </p>
+
+  <p>Here comes a list with the most interesting Jinx features:</p>
+
+  <ul>
+    <li>You do not need to install anything to use Jinx. Just start creating in the browser.</li>
+    <li>Jinx exports your game to a stand-alone HTML page. Jinx games run in any modern browser.</li>
+    <li>Super-simple deployment. All Jinx games are entirely stand-alone HTML pages. They run without any server component. You do
+      not need to setup anything to distribute your game. Just send the HTML file to your friends. Or just upload
+      it to Itch.io.</li>
+    <li>Jinx games are created with a simple mark-up syntax. No knowledge of JavaScript required.</li>
+    <li>You can use the whole power of JavaScript though, if you want to.</li>
+    <li>Built-in support for multimedia (images, audio, video).</li>
+    <li>Jinx's markup language is inspired by Inklestudios' Ink and offers powerful support for nesting choices.</li>
+    <li>Plugin system to extend you story's capabilities.</li>
+    <li>You keep all rights to your game and can do whatever you want with it (including commercial use).</li>
+  </ul>
+
+
+
+<h3>The most important rule for creating with Jinx</h3>
+
+  <p>Here comes the most important rule for creating stuff with Jinx:
+  <b>never close the browser tab without saving a current copy of your project first!</b><p>
+
+  <p>
+    So, how do you save your project? Easy: by clicking on the "Save" button. This should
+    download a file to your device's hard drive.
+    If the download fails for whatever reason, your project has <b>not</b> been saved
+    (but usually the download should not fail).
+    The downloaded file has a ".json" extension and is named after the date and time
+    you downloaded it. Store this file in a location where you will find it in the future.
+  </p>
+
+  <p>
+    Jinx by default does <b>NOT</b> save anything in the cloud, in the browser
+    or elsewhere, so if you lose your project save files, your
+    project will be gone forever. Make regular backups of your data!
+  </p>
+
+  <p>
+    Your entire project is included in the ".json" file you downloaded, including
+    all images, audio and videos (if you have any). To open your project, 
+    click on the "Open" button and select the correct ".json" file from your device.
+    Then wait until the file has been uploaded.
+  </p>
+
+  <p>
+    Important: Do not confuse the "Save" button with the "Export" button.
+    The "Export" button lets you download your final game for distribution (as an HTML page).
+    The "exported" HTML file does <b>not</b> contain your project data,
+    so you cannot restore your game from it.
+    <br>
+    Remember:<br>
+    ".json" file: good, contains your entire project. Keep this.<br>
+    ".html" file: just for distributing your game to players. Not for saving or archiving purposes.
+  </p>
+
+
+<h3>Limitations</h3>
+  <p>
+  Jinx projects can include images, audio and even video files.
+  Just be aware of the fact that media files will make your project
+  file way bigger (especially audio and video files). Because of the way
+  browsers work, you should always aim to keep your project
+  under 4GB (Gigabytes) size. If the project gets too big, you won't be able
+  to save it anymore and you will have to remove some media.
+  The assets tab shows a rough estimate of how much size each media file takes.
+  </p>
+
+<h3>Displaying Text</h3>
+<p>
+While Jinx games can use images and audio, they are mostly text-based.
+
+The "Story" tab on the left-hand side is where you write your game.
+The "Play" tab on the right-hand side is where you test your game.
+These are the two tabs you will use the most.
+Start by typing or copy-pasting text into the "Story" tab
+and look at the results in the "Play" tab.
+</p>
+
+<p>
+The most simple Jinx game looks like this (copy this into your "Story" tab):
+</p>
+
+<pre>
+  Hello!
+  .endgame
+</pre>
+
+<p>
+  This will just display the text "Hello!" and end the game.
+  (The ".endgame" command is required.)
+</p>
+
+<p>
+  If you spread a sentence over several lines, Jinx will still display
+  it all on the same line. This code:
+</p>
+
+<pre>
+  You've reached a place
+  of darkness
+  and tranquility.
+  .endgame
+</pre>
+
+and this code:
+
+<pre>
+  You've reached a place of darkness and tranquility.
+  .endgame
+</pre>
+
+will both output the exact same thing, namely the
+sentence: "You've reached a place of darkness and tranquility.", without
+any line breaks between the words.
+
+If you actually want to print separate paragraphs, use an <b>empty line</b>, like so:
+
+<pre>
+  This is the
+  first paragraph.
+
+  This is the second
+  paragraph.
+
+  This is the third paragraph.
+
+  .endgame
+</pre>
+
+This will give you three separate text paragraphs.
+
+<h3>Comments</h3>
+
+<p>
+Comments are text that is not shown to the user
+and is not used by the game in any way. You can use them as notes to yourself.
+(Or as notes to the people reading your story's source code.)
+<p/>
+
+
+<p>
+To create a comment, start a line with two slashes:
+</p>
+
+<pre>
+  This text will be displayed.
+  //I am a comment. I won't be displayed.
+  .endgame
+</pre>
+
+
+
+<h3>Knots and gotos</h3>
+
+A Jinx game is usually divided into independent sections.
+We call these sections "knots". A knot starts with a
+new line starting with three equal symbols:
+
+<pre>
+
+  === forest
+
+    You are in the forest.
+
+  === road
+
+    You are walking down an old, dusty road.
+
+</pre>
+
+<p>
+The word after the === must be a single word.
+That's the knot's internal name. The internal name is never displayed to the player,
+it's just there for the story creator. In the code above we have two knots,
+one is named "forest", the other one "road".</p>
+
+<p>Note that knot names are case-insensitive. This means that "Road", "road"
+and "rOAd" all refer to the same knot. (Most other things in Jinx are <b>case-sensitive</b>.)
+It's recommended to always use lower-case letters for knot names, to avoid confusion.</p>
+
+<p>
+We can jump around between different knots using the ".goto" ("go to") command:
+</p>
+
+<pre>
+  Hello!
+  .goto a_knot
+
+  This is never printed.
+
+  === a_knot
+
+  Hello to you too!
+  .endgame
+</pre>
+
+<p>
+This example just prints "Hello! Hello to you too!" as two paragraphs, but it does so in a slightly
+convoluted way. We start from the first line and display
+the first "Hello!". Then we continue to the next line. We encounter the ".goto start_knot" command,
+and jump to the line "=== a_knot". The line "This is never printed." is skipped and therefore
+it's not printed. We keep going down the file to reach the line "Hello to you too!".
+We display this text, too. Finally, we encounter the ".endgame" command which ends the game.
+If you understand this, you understand how "goto" commands work.
+</p>
+
+<h3>Choices</h3>
+
+<p>Now that we understand knots and gotos, we can finally add choices to our game.
+Choices are options that can be selected by the player. A line starting with a plus character
+is a choice:</p>
+
+<pre>
+  + I am a choice.
+</pre>
+
+
+<p>In this simple example you can choose whether you want to enter the forest or want to turn back:</p>
+
+<pre>
+  You have reached the edge of a dark and mysterious forest.
+
+  + Enter the forest
+    .goto forest
+
+  + Go back home
+    .goto go_back_home
+
+  === forest
+    Hesitantly, you enter the forest ...
+    .endgame
+
+  === go_back_home
+    This looks dangerous. You decide to go back home ...
+    .endgame    
+</pre>
+
+<h3>Glue</h3>
+
+Jinx interprets empty lines as paragraph breaks (see above).
+Sometimes you want an empty line without a paragraph break, though.
+In that case you can use <b>&lt;&gt;</b> This is a so-called "glue" token,
+because it glues text together.
+
+<pre>
+
+  We went down that road and
+
+  <> came back.
+
+</pre>
+
+<p>The &lt;&gt; negates the preceding empty line, so to speak.
+The text will display as a single sentence, even if there is an empty
+line in between.</p>
+
+Another example:
+
+<pre>
+  Jinx automatically inserts spaces between words.
+  Here we use glue tokens to print 
+  "ultra<>
+  splendo<>
+  glurba<>
+  nurba<>
+  flirpy<>
+  bockley<>
+  licious"
+  as a single word.
+  .endgame
+</pre>
+
+<p>
+Glue can be used at the beginning or the ending of a line.
+Note that this:
+</p>
+
+<pre>
+  abc
+  <>def
+</pre>
+
+<p>
+and this:
+</p>
+
+<pre>
+  abc<>
+  def
+</pre>
+
+yield the exact same result.
+
+
+<h3>Gathers</h3>
+
+<p>
+  You can write an entire Jinx game just using choices, knots and gotos.
+  But Jinx has more features to control the flow of your interactive story.
+</p>
+
+<p>
+  If you are coming from Ink, you should feel right at home, because that's
+  where Jinx stole most of its ideas about story flow from.
+  Otherwise, everything might seem strange at first. Just go with the (story) flow!
+  Once you get started with it, there is no going back, and you will
+  realize it's the superior way to create branching content. I promise! :)
+</p>
+
+<pre>
+  "Have you watered that eucalyptus, yet?", the gardener asks.
+
+  + "Yes, Sir, of course!"
+    "Well, good", he mutters, "Now do the back of the
+    garden and we should be done."
+
+  + "Nah. I didn't feel like it."
+    "Well, you better do it before the Lady gets home", he mutters,
+    "She doesn't pay us to be slacking around."
+
+  -
+  He adjusts his cap and walks away.
+  .endgame
+</pre>
+
+<p>
+  The new thing here is the minus character. This is called a gather.
+  To create a gather you put a minus symbol on its own line.
+</p>
+
+<p>
+  If you play through the example above, you will realize that
+  the last line of text ("He adjusts his cap and walks away.")
+  will always appear, no matter what we choose.
+  That's because of our gather command.
+  The gather command basically gathers all story threads above and connects
+  them into a single thread. No matter what we chose above, eventually
+  we will always end up at the minus and continue from there.
+</p>
+
+<p>
+  This lets us easily create many choices that display a different text
+  when clicked, but do not really branch the story flow.
+</p>
+
+<h3>Nested choices</h3>
+
+<p>Now it gets even weirder. We can nest choices.
+Consider this example:</p>
+
+<pre>
+  Choose yoour spirit animal:
+
+  + mammal
+
+    ++ cat
+      You are fierce and unpredictable like a cat!
+
+    ++ dog
+      You are faithful and smart like a dog!
+
+  + bird
+
+    ++ owl
+      You are mysterious and wise like an owl!
+
+    ++ eagle
+      You are strong and independent like an eagle!
+
+  + amphibian
+
+    ++ snake
+      You are sneaky and dangerous like a snake!
+
+    ++ crocodile
+      You are lazy and aggressive like a crocodile!
+
+  -
+  Now that you have chosen your spirit animal, it's time to choose your wand!
+  .endgame
+</pre>
+
+
+<pre>
+.goto start_knot
+
+This is never printed.
+
+=== start_knot
+The game starts here and en
+.goto second_knot
+
+=== second_knot
+continues here.
+.endgame
+</pre>
+
+<p>
+</p>
+
+
+<p>
+</p>
+
+<pre>
+</pre>
+
+<pre>
+</pre>
+
+<pre>
+</pre>
+
+<h3></h3>
+
+
+
+<p>
+</p>
+
+
+<p>
+</p>
+
+<h3></h3>
+
+
+
+<p>
+</p>
+
+
+<p>
+</p>
+
+<h3></h3>
+
+
+
+<p>
+</p>
+
+
+<p>
+</p>
+
+
+<h3></h3>
+
 
 <p>A basic game with two choices:</p>
 <pre>
@@ -514,22 +974,19 @@ window.HELP_CONTENTS = `
     - enabledByDefault: true/false,<br><br>
 
   <b>The following properties are optional:</b><br><br>
-  - logo: a string containing a single emoji character. This is used to depict the plugin
-      inside the app, to make it visually more recognizable. This has no effect on the
-      functionality of the plugin whatsoever, it's just eye-candy.<br><br>
+  - logo: a string containing a logo image for the plugin.
+  (The logo is just optional eye-candy for the end-user.)
+  The string should contain an image
+  in svg format. The image should be mono-color, consisting of white and transparent parts only.
+  (This way the editor can change the color however it sees fit.)
+  Alternatively, set this property to an empty string or leave it undefined.
+  <br><br>
 
   - licenseTextMustBeIncludedInFinalGame: a boolean indicating whether the entire text
       of the license should be copied into the source code of the final exported game.
       Set this to true to include the license text. Leave it undefined or set it to false
       to not include the license text.<br><br>
 
-  <b>Other optional properties:</b><br><br>
-
-  All other properties <i>containing a string</i> are okay to use but they have no special meaning.
-
-  For example you could add a property "additionalInfo" with content "some text ..."
-  to your plugin. The string will be displayed to the user in the plugin view, but it does
-  not do anything else than that.
 
 
   </p>

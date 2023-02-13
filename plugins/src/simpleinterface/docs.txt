@@ -26,7 +26,7 @@
 <h2>Changing button texts</h2>
 
 Here's how you can change the button texts (for example for localization).
-At the beginning of your game, do:
+For example, for a German game, you might want to put this at the beginning of your game:
 
 <pre>
     # simpleInterface.setButtonText("load", "Laden")
@@ -34,6 +34,7 @@ At the beginning of your game, do:
     # simpleInterface.setButtonText("erase", "Laden")
     # simpleInterface.setButtonText("undo", "Rückgängig")
 </pre>
-    
+
+
 
 
