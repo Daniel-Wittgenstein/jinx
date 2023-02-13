@@ -57,6 +57,7 @@ function processPath(input, output, outputType) {
     js: input + "/source.js",
     css: input + "/source.css",
     json: input + "/meta.json",
+    docs: input + "/docs.txt",
   }
 
   const filesContent = {}
@@ -100,6 +101,7 @@ function processPath(input, output, outputType) {
   obj.implementation = {}
   if (files.js) obj.implementation.js = filesContent.js
   if (files.css) obj.implementation.css = filesContent.css
+  if (files.docs) obj.documentation = filesContent.docs
 
   //Then convert it back to JSON:
   let json

@@ -1,4 +1,39 @@
-fuck 
-your selfie
-!!!
- !
+
+<h2>About</h2>
+<p>
+    This plugin provides a simple standard user
+    interface with save, load and undo functionality.
+</p>
+
+<h2>Maximum undo</h2>
+<p>
+    By default, the player can undo 7 turns.
+    To change this, put this line at the beginning of your game:
+</p>
+
+<pre>
+    # simpleInterface.setMaxUndo(5) 
+</pre>
+
+<p>
+    The above example would set the maximum undo limit to 5 turns.
+    Setting this number to somewhere between 0 (no undo at all) and 20
+    is reasonable. (Theoretically you could go up to one million and higher,
+    but the higher this number is, the more memory your game will eat up.)
+    Also, do not use this command twice in the same story.
+</p>
+
+<h2>Changing button texts</h2>
+
+Here's how you can change the button texts (for example for localization).
+At the beginning of your game, do:
+
+<pre>
+    # simpleInterface.setButtonText("load", "Laden")
+    # simpleInterface.setButtonText("save", "Speichern")
+    # simpleInterface.setButtonText("erase", "Laden")
+    # simpleInterface.setButtonText("undo", "Rückgängig")
+</pre>
+    
+
+

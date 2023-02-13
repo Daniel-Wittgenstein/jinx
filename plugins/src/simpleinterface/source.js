@@ -1,10 +1,13 @@
 ;(function() {
 
-  /* 
-    User Interface options:
-    simpleInterface.maxUndoStates(5) //set maximum undo to 5 turns
 
-  */
+  
+  const buttonTexts = {
+    load: "load",
+    save: "save",
+    undo: "undo",
+    erase: "erase",
+  }
 
   const userInterface = {
     setMaxUndo(num) {
@@ -15,7 +18,12 @@
         throw new Error(`setMaxUndo must be at least 0`)
       }
       maxUndoStates = num
-    }
+    },
+    setButtonText(prop, text) {
+      buttonTexts[prop] = text
+      const el = document.getElementById(`${domPrefix}${prop}`)
+      el.innerHTML = text
+    },
   }
   window.simpleInterface = userInterface
 
@@ -41,19 +49,19 @@
     const bar = document.createElement('div')
     bar.style = `margin-bottom: 20px;`
     bar.innerHTML = `
-      <button id="\${domPrefix}load">load</button>
-      <button id="\${domPrefix}save">save</button>
-      <button id="\${domPrefix}erase">erase</button>
-      <button id="\${domPrefix}undo">undo</button>
+      <button id="${domPrefix}load">load</button>
+      <button id="${domPrefix}save">save</button>
+      <button id="${domPrefix}erase">erase</button>
+      <button id="${domPrefix}undo">undo</button>
     `
     el.prepend(bar)
-    const loadEl = document.getElementById(`\${domPrefix}load`)
+    const loadEl = document.getElementById(`${domPrefix}load`)
     loadEl.addEventListener("click", clickLoad)
-    const saveEl = document.getElementById(`\${domPrefix}save`)
+    const saveEl = document.getElementById(`${domPrefix}save`)
     saveEl.addEventListener("click", clickSave)
-    const undoEl = document.getElementById(`\${domPrefix}undo`)
+    const undoEl = document.getElementById(`${domPrefix}undo`)
     undoEl.addEventListener("click", clickUndo)
-    const eraseEl = document.getElementById(`\${domPrefix}erase`)
+    const eraseEl = document.getElementById(`${domPrefix}erase`)
     eraseEl.addEventListener("click", clickErase)
 
     jin.createEffect ("initTurn", () => {
